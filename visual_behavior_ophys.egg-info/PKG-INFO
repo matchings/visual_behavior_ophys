@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: visual-behavior-ophys
+Version: 0.1
+Summary: visual behavior ophys analysis
+Home-page: https://github.com/matchings/visual_behavior_ophys
+Author: marinag
+Author-email: marinag@alleninstitute.org
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires: pandas
+Requires: numpy
+Requires: scipy
+Requires: PyDAQmx

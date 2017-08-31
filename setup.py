@@ -9,7 +9,7 @@ setup(name="visual_behavior__ophys",
       author_email="marinag@alleninstitute.org",
       url="https://github.com/matchings/visual_behavior_ophys",
       packages=packages,
-      requires=['pandas', 'numpy', 'scipy', 'PyDAQmx'],
+      requires=['pandas', 'numpy', 'scipy', 'seaborn'],
       include_package_data=True,
       package_data={
           "": ['*.png', '*.ico', '*.jpg', '*.jpeg'],

@@ -1,0 +1,17 @@
+setup.py
+core/__init__.py
+core/response_analysis.py
+core/visual_behavior_ophys_dataset.py
+dro/__init__.py
+dro/utilities.py
+plotting_tools/__init__.py
+plotting_tools/basic_plotting.py
+roi_masks/__init__.py
+roi_masks/objectlist.py
+sync/__init__.py
+sync/dataset.py
+sync/process_sync.py
+visual_behavior_ophys.egg-info/PKG-INFO
+visual_behavior_ophys.egg-info/SOURCES.txt
+visual_behavior_ophys.egg-info/dependency_links.txt
+visual_behavior_ophys.egg-info/top_level.txt
