@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 packages = find_packages()
 
-setup(name="visual_behavior__ophys",
+setup(name="visual_behavior_ophys",
       version=0.1,
       description="visual behavior ophys analysis",
       author="marinag",

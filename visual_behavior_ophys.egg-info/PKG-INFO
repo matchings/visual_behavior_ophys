@@ -11,4 +11,4 @@ Platform: UNKNOWN
 Requires: pandas
 Requires: numpy
 Requires: scipy
-Requires: PyDAQmx
+Requires: seaborn

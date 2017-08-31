@@ -1,5 +1,1 @@
-core
-dro
-plotting_tools
-roi_masks
-sync
+visual_behavior_ophys
