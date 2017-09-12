@@ -168,7 +168,7 @@ class VisualBehaviorSutterDataset(object):
 
 
     def get_sync(self):
-        from visual_behavior_ophys.temporal_alignment.process_sync import process_sync
+        from visual_behavior_ophys.temporal_alignment.process_sync import process_sync_sutter
         sync_path = self.get_sync_path()
         self.sync, self.sync_data = process_sync(sync_path, self.pkl)
         return self.sync

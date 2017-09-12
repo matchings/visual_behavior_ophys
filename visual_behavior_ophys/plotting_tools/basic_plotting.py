@@ -51,6 +51,7 @@ def plot_mask_on_max_proj(self, cell_list, ax=None, save=False):
         else:
             return ax
 
+
 def plot_trace(trace, ylabel='dF/F', interval=5, ax=None):
     if ax is None:
         fig, ax = plt.subplots(figsize=(20, 5))
@@ -65,6 +66,7 @@ def plot_trace(trace, ylabel='dF/F', interval=5, ax=None):
     ax.set_xlabel('minutes')
     return ax
 
+
 def plot_trace_hist(trace, xlabel='dF/F', ax=None):
     if ax is None:
         fig, ax = plt.subplots(figsize=(5, 5))
@@ -74,24 +76,24 @@ def plot_trace_hist(trace, xlabel='dF/F', ax=None):
     return ax
 
 
-
-def plot_traces(self, traces_list):
+def plot_traces(dataset, traces_list):
     fig, ax = plt.subplots(len(traces_list), 1, figsize=(15, 10))
     ax = ax.ravel()
     for i, roi in enumerate(traces_list):
-        ax[i].plot(self.traces[roi, :])
+        ax[i].plot(dataset.dff_traces[roi, :])
         #         ax[i].axis('off')
         ax[i].set_ylabel('roi ' + str(i))
         ax[i].set_xticklabels([])
         ax[i].set_yticklabels([])
         ax[i].set_axis_bgcolor('white')
-        ax[i].set_xlim([0, self.traces.shape[1]])
+        ax[i].set_xlim([0, dataset.dff_traces.shape[1]])
         ax[i].set_ylabel(str(roi))
     plt.show()
-    fig_title = 'traces'
-    saveFigure(fig, os.path.join(self.save_dir, fig_title), formats=['.png'], size=(15, 10))
+    fig_title = 'dff_traces'
+    saveFigure(fig, os.path.join(dataset.save_dir, fig_title), formats=['.png'], size=(15, 10))
 
-def plot_traces_heatmap(self, traces, trace_type='dFF', baseline_method='percentile', cmap=cmaps.magma, save=False):
+
+def plot_traces_heatmap(self, traces, trace_type='dFF', baseline_method='percentile', cmap='magma', save=False):
     sns.set_context('notebook', font_scale=2, rc={'lines.markeredgewidth': 1})
     # normalization method needs work
     figsize = (20, 8)
@@ -105,8 +107,6 @@ def plot_traces_heatmap(self, traces, trace_type='dFF', baseline_method='percent
     fig.tight_layout()
     if save:
         plt.tight_layout()
-        if cmap is cmaps.plasma:
-            cmap = 'plasma'
         fig_title = trace_type + '_traces_' + baseline_method + '_heatmap_' + cmap
         fig_dir = os.path.join(self.save_dir, 'traces')
         if not os.path.exists(fig_dir):
@@ -115,26 +115,27 @@ def plot_traces_heatmap(self, traces, trace_type='dFF', baseline_method='percent
         plt.close()
     return fig, ax
 
-    def plot_all_trials(self):
-        plt.ioff()
-        df = self.df
-        for cell in df.cell.unique():
-            figsize = (6, 5)
-            fig, ax = plt.subplots(figsize=figsize)
-            for trial in df.trial.unique():
-                trace = df[(df.cell == cell) & (df.trial == trial)]['responses'].values[0]
-                timestamps = df[(df.cell == cell) & (df.trial == trial)].response_timestamps.values[0]
-                timestamps = timestamps - timestamps[0]
-                ax.plot(timestamps, trace)
-                ax.set_title('roi ' + str(cell) + ' - all trials')
-                ax.set_xticks(np.arange(self.window[0] - self.window[0], self.window[1] - self.window[0] + 1, 1))
-                ax.set_xticklabels(np.arange(self.window[0], self.window[1] + 1, 1))
-                ax.set_ylabel('dFF')
-                ax.set_xlabel('time(s)')
-            fig.tight_layout()
-            fig_folder = 'all_trials'
-            fig_title = 'roi_' + str(cell)
-            fig_dir = os.path.join(self.save_dir, fig_folder)
-            if not os.path.exists(fig_dir): os.mkdir(fig_dir)
-            saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
-            plt.close()
+def plot_all_trials(self):
+    plt.ioff()
+    df = self.df
+    for cell in df.cell.unique():
+        figsize = (6, 5)
+        fig, ax = plt.subplots(figsize=figsize)
+        for trial in df.trial.unique():
+            trace = df[(df.cell == cell) & (df.trial == trial)]['responses'].values[0]
+            timestamps = df[(df.cell == cell) & (df.trial == trial)].response_timestamps.values[0]
+            timestamps = timestamps - timestamps[0]
+            ax.plot(timestamps, trace)
+            ax.set_title('roi ' + str(cell) + ' - all trials')
+            ax.set_xticks(np.arange(self.window[0] - self.window[0], self.window[1] - self.window[0] + 1, 1))
+            ax.set_xticklabels(np.arange(self.window[0], self.window[1] + 1, 1))
+            ax.set_ylabel('dFF')
+            ax.set_xlabel('time(s)')
+        fig.tight_layout()
+        fig_folder = 'all_trials'
+        fig_title = 'roi_' + str(cell)
+        fig_dir = os.path.join(self.save_dir, fig_folder)
+        if not os.path.exists(fig_dir): os.mkdir(fig_dir)
+        saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
+        plt.close()
+

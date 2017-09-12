@@ -675,7 +675,7 @@ class Dataset(object):
             axes_obj = plt.gca()
             axes_obj.set_ylim(-0.1, 1.1)
         #ax.set_ylabel('Logic State')
-        ax.yaxis.set_ticks_position('none')
+        #ax.yaxis.set_ticks_position('none')
         plt.setp(ax.get_yticklabels(), visible=False)
         ax.set_xlabel('time (seconds)')
         ax.legend([name])

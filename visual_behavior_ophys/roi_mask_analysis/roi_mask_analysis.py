@@ -70,6 +70,12 @@ def make_roi_dict(df,masks,index=' traceindex'):
         roi_dict[roi] = roi_mask
     return roi_dict
 
+def make_roi_mask_array(df,roi_dict):
+    roi_mask_array = np.empty(len(roi_dict.keys()),roi_dict[roi_dict.keys()[0]].shape)
+    for i,roi in enumerate(roi_mask_dict.keys()):
+        roi_mask_array[i] = roi_mask_dict[roi]
+    return roi_dict
+
 def get_roi_metrics(expt_dir):
     roi_metrics_df = pd.read_csv(os.path.join(expt_dir, 'objectlist.txt'))  # segmentation metrics
     roi_metrics_df = roi_metrics_df[roi_metrics_df[' traceindex'] != 999]
@@ -145,32 +151,23 @@ def plot_roi_mask(roi_mask_dict,roi,max_image=None,ax=None):
 
 
 # plot distribution of metric values across all rois
-def plot_metric_distribution(df,metric,thresh_min=None,thresh_max=None,ax=None):
+def plot_metric_distribution(df,metric,thresh=None,ax=None):
     if ax is None: 
         fig,ax=plt.subplots()
     ax.hist(df[metric].values,bins=50);
-    ax.set_title('metric = '+metric+', min = '+str(thresh_min)+', max = '+str(thresh_max))
+    ax.set_title('metric = '+metric+', threshold = '+str(thresh))
     ax.set_xlabel('value')
     ax.set_ylabel('# rois')
-    if thresh_min:
-        ax.axvline(thresh_min,color='g',linestyle='dashed',label='thresh_min')
-    if thresh_max:
-        ax.axvline(thresh_max,color='m',linestyle='dashed',label='thresh_max')
+    if thresh:
+        ax.axvline(thresh,color='g',linestyle='dashed',label='thresh_min')
 #     ax.legend(loc=9)
     if ax is not None: 
         return ax
 
 
 # get roi indices with metric values within a given range, for a single metric
-def get_filtered_inds_single_metric(roi_metrics,metric,thresh_min=None,thresh_max=None):
-    if thresh_min and thresh_max:
-        filtered_inds = roi_metrics[(roi_metrics[metric]>thresh_min) & (roi_metrics[metric]<thresh_max)][' traceindex'].values
-    elif thresh_min and thresh_max is None:
-        filtered_inds = roi_metrics[(roi_metrics[metric]>thresh_min)][' traceindex'].values
-    elif thresh_max and thresh_min is None:
-        filtered_inds = roi_metrics[(roi_metrics[metric]<thresh_max)][' traceindex'].values
-    elif thresh_max is None and thresh_min is None:
-        filtered_inds = roi_metrics[' traceindex'].values
+def get_filtered_inds_single_metric(roi_metrics,metric,thresh=None):
+    filtered_inds = roi_metrics[(roi_metrics[metric]>thresh)][' traceindex'].values
     return filtered_inds
 
 
@@ -225,13 +222,13 @@ def plot_filtered_mask(roi_mask_dict,filtered_mask,max_image=None,labels=False,a
 
 
 # generate figure with 1) distribution of metric values & 2) mask of filtered rois on max projection image
-def plot_metric_thresh(roi_metrics,roi_mask_dict,metric,thresh_min,max_image,save_dir=False):
-    fig_title = str(expt_id)+'_'+str(metric)+'_'+str(thresh_min)
+def plot_metric_thresh(roi_metrics,roi_mask_dict,metric,thresh,max_image,save_dir=False):
+    fig_title = str(expt_id)+'_'+str(metric)+'_'+str(thresh)
     figsize=(20,7)
     fig,ax = plt.subplots(1,2,figsize=figsize)
     ax = ax.ravel()
-    plot_metric_distribution(roi_metrics,metric,thresh_min=thresh_min,thresh_max=None,ax=ax[0])
-    filtered_inds = get_filtered_inds_single_metric(roi_metrics,metric,thresh_min=thresh_min);
+    plot_metric_distribution(roi_metrics,metric,thresh=thresh,ax=ax[0])
+    filtered_inds = get_filtered_inds_single_metric(roi_metrics,metric,thresh=thresh);
     filtered_mask = make_filtered_mask(roi_mask_dict,filtered_inds)
     plot_filtered_mask(roi_mask_dict,filtered_mask,max_image,ax=ax[1])
     if save_dir:
@@ -243,9 +240,9 @@ def plot_filtered_roi_masks_for_range_of_filter_metrics(roi_metrics, roi_mask_di
     save_dir = os.path.join(save_dir, 'segmentation_metrics')
     if not os.path.exists(save_dir): os.mkdir(save_dir)
     metrics = [' area', ' shape0', ' meanInt0']
-    am = filter_params['area_min']
-    mm = filter_params['meanInt_min']
-    sm = filter_params['shape_min']
+    am = filter_params[' area']
+    mm = filter_params[' shape0']
+    sm = filter_params[' meanInt0']
     filters = {' area': np.arange(am - 20, am + 70, 20), ' shape0': np.arange(sm - 0.1, sm + 0.4, 0.1),
                ' meanInt0': np.arange(mm - 20, mm + 60, 20)}
     for metric in metrics:
@@ -256,30 +253,31 @@ def plot_filtered_roi_masks_for_range_of_filter_metrics(roi_metrics, roi_mask_di
 # get roi indices that meet multiple metric parameters   
 def get_filtered_inds_for_standard_metrics(roi_metrics,filter_params):
     metrics = filter_params.keys()
-    metrics_list = []
+    inds_list = []
     for i,metric in enumerate(metrics):
-        metrics_list.append(get_filtered_inds_single_metric(roi_metrics,metric,thresh_min=filter_params[metric],thresh_max=None))
-    return metrics_list
+        inds = get_filtered_inds_single_metric(roi_metrics,metric,thresh=filter_params[metric])
+        inds_list = np.hstack((inds_list,inds))
+    return inds_list
        
 
-def get_filter_parameters(zoom,layer):
+def get_standard_filter_parameters(zoom,layer=None):
     if zoom == 3:
-        filter_params = {'area_min': 200, 'meanInt_min': 40, 'shape_min': 0.3}
+        filter_params = {' area': 200, ' meanInt0': 40, ' shape0': 0.3}
     elif zoom == 2 and layer == 5:
-        filter_params = {'area_min': 160, 'meanInt_min': 40, 'shape_min': 0.3}
+        filter_params = {' area': 160, ' meanInt0': 40, ' shape0': 0.3}
     elif zoom == 2:
-        filter_params = {'area_min': 120, 'meanInt_min': 25, 'shape_min': 0.2}
+        filter_params = {' area': 120, ' meanInt0': 25, ' shape0': 0.2}
     elif zoom == 1:
-        filter_params = {'area_min': 10, 'meanInt_min': 30, 'shape_min': 0.1}
+        filter_params = {'area': 10, ' meanInt0': 30, ' shape0': 0.1}
     return filter_params
 
 
 # get roi indices for rois that meet all metric filter criteria
 def get_filtered_indices(roi_metrics,filter_params):
-    metrics_list = get_filtered_inds_for_standard_metrics(roi_metrics,filter_params)
+    inds_list = get_filtered_inds_for_standard_metrics(roi_metrics,filter_params)
     filtered_indices = []
     for roi in roi_metrics[' traceindex'].values:
-        if roi in metrics_list: #and (roi in maxMeanRatio)
+        if roi in inds_list: #and (roi in maxMeanRatio)
             filtered_indices.append(roi)
     filtered_indices = np.asarray(filtered_indices)
     return filtered_indices
@@ -305,15 +303,8 @@ if __name__ == '__main__':
     roi_metrics = roi_metrics[roi_metrics[' traceindex']!=999] # remove edge cells, etc. maxInt_masks2 has rois with traceindex = 999 removed
       
  
-     #standard filter params - for zoom settings on Sutter MoM - selected using output of plot_seg_filters below
-    if zoom == 3: 
-        filter_params = {'area_min':200,'meanInt_min':40,'shape_min':0.3}
-    elif zoom == 2 and layer == 5: 
-        filter_params = {'area_min':160,'meanInt_min':40,'shape_min':0.3}
-    elif zoom == 2: 
-        filter_params = {'area_min':120,'meanInt_min':25,'shape_min':0.2}
-    elif zoom == 1: 
-        filter_params = {'area_min':10,'meanInt_min':30,'shape_min':0.2}
+    #standard filter params - for zoom settings on Sutter MoM - selected using output of plot_seg_filters below
+    filter_params = get_standard_filter_parameters(zoom,layer)
     
     # make dictionary of masks where keys are roi IDs and values are the binary masks for that roi
     roi_mask_dict = make_roi_dict(roi_metrics,original_roi_mask)
