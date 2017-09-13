@@ -16,8 +16,8 @@ sns.set_style('darkgrid')
 sns.set_context('notebook', font_scale=2.5, rc={'lines.markeredgewidth': 2})
 
 
-def save_figure(fig, figsize, analysis_dir, folder, fig_title, formats=['.png']):
-    fig_dir = os.path.join(analysis_dir, folder)
+def save_figure(fig, figsize, save_dir, folder, fig_title, formats=['.png']):
+    fig_dir = os.path.join(save_dir, folder)
     if not os.path.exists(fig_dir):
         os.mkdir(fig_dir)
     import matplotlib as mpl
@@ -79,7 +79,7 @@ def make_lick_raster(df, ax, xmin=-4, xmax=8, figsize=None):
     ax.set_xlim([xmin, xmax])
 
 
-def plot_behavior(pkl_df, analysis_dir=None, ax=None):
+def plot_behavior(pkl_df, save_dir=None, ax=None):
     if ax is None:
         figsize = (6, 12)
         fig, ax = plt.subplots(figsize=figsize)
@@ -89,9 +89,9 @@ def plot_behavior(pkl_df, analysis_dir=None, ax=None):
     ax.set_xlabel('time after change (s)')
     ax.set_ylabel('trials')
     plt.gca().invert_yaxis()
-    if analysis_dir:
+    if save_dir:
         fig.tight_layout()
-        save_figure(fig, figsize, analysis_dir, fig_title='behavior', folder='behavior', formats=['.png'])
+        save_figure(fig, figsize, save_dir, fig_title='behavior', folder='behavior', formats=['.png'])
     return ax
 
 
@@ -145,7 +145,7 @@ def placeAxesOnGrid(fig, dim=[1, 1], xspan=[0, 1], yspan=[0, 1], wspace=None, hs
 
 #
 # # In[131]:
-# def create_resp_prob_heatmap(df, ax=None, cmap=cmaps.magma, analysis_dir=None):
+# def create_resp_prob_heatmap(df, ax=None, cmap=cmaps.magma, save_dir=None):
 #     if ax is None:
 #         figsize = (7, 7)
 #         fig, ax = plt.subplots(figsize=figsize)
@@ -167,10 +167,10 @@ def placeAxesOnGrid(fig, dim=[1, 1], xspan=[0, 1], yspan=[0, 1], wspace=None, hs
 #     ax.set_xlabel('final image', fontsize=14)
 #     ax.set_ylabel('initial image', fontsize=14)
 #
-#     if analysis_dir:
+#     if save_dir:
 #         plt.gcf().subplots_adjust(left=0.32)
 #         plt.gcf().subplots_adjust(bottom=0.22)
-#         save_figure(fig, figsize, analysis_dir, 'response_probability', 'behavior')
+#         save_figure(fig, figsize, save_dir, 'response_probability', 'behavior')
 #
 #     return ax
 #
@@ -178,7 +178,7 @@ def placeAxesOnGrid(fig, dim=[1, 1], xspan=[0, 1], yspan=[0, 1], wspace=None, hs
 
 def create_resp_prob_heatmap_general(df, values='response', index='initial_image', columns='change_image',
                                      filter_by_reward_rate=True, aggfunc=np.mean, cmap='magma', ax=None,
-                                     analysis_dir=None):
+                                     save_dir=None):
     if ax is None:
         figsize = (6, 6)
         fig, ax = plt.subplots(figsize=figsize)
@@ -213,17 +213,17 @@ def create_resp_prob_heatmap_general(df, values='response', index='initial_image
     ax.set_title(values, va='bottom', ha='center')
     ax.set_xlabel(columns)
     ax.set_ylabel(index)
-    if analysis_dir:
+    if save_dir:
         plt.gcf().subplots_adjust(left=0.32)
         plt.gcf().subplots_adjust(bottom=0.22)
-        save_figure(fig, figsize, analysis_dir, values + '_' + index + '_' + columns, 'behavior', formats=['.png'])
+        save_figure(fig, figsize, save_dir, values + '_' + index + '_' + columns, 'behavior', formats=['.png'])
 
     return ax
 
 
 # # In[ ]:
 #
-# def plot_mean_resp_by_transition_matrix(resp_df, analysis_dir, fig_title):
+# def plot_mean_resp_by_transition_matrix(resp_df, save_dir, fig_title):
 #     figsize = (6, 6)
 #     fig, ax = plt.subplots(figsize=figsize)
 #     # df = df[df.trial_type!='aborted']
@@ -240,14 +240,14 @@ def create_resp_prob_heatmap_general(df, values='response', index='initial_image
 #     ax.set_xlabel('final image', fontsize=16)
 #     ax.set_ylabel('initial image', fontsize=16)
 #
-#     save_figure(fig, figsize, analysis_dir, fig_title='sig_cells', folder='cell_response_heatmaps')
+#     save_figure(fig, figsize, save_dir, fig_title='sig_cells', folder='cell_response_heatmaps')
 #     plt.close()
 #
 #
 # # In[ ]:
 #
 def plot_mean_resp_heatmap_cell(df, cell, values='mean_response', index='initial_code', columns='change_code',
-                                analysis_dir=None, ax=None):
+                                save_dir=None, ax=None):
     resp_df = df[df.cell == cell]
     resp_df = resp_df[['cell', index, columns, values, 'responses']]
     #    resp_df = resp_df[['cell','initial_code','change_code','responses','mean_response']]
@@ -268,9 +268,9 @@ def plot_mean_resp_heatmap_cell(df, cell, values='mean_response', index='initial
     ax.set_xlabel(columns, fontsize=16)
     ax.set_ylabel(index, fontsize=16)
 
-    if analysis_dir is not None:
+    if save_dir is not None:
         fig.tight_layout()
-        save_figure(fig, figsize, analysis_dir, fig_title='roi_' + str(cell) + '_' + index + '_pref',
+        save_figure(fig, figsize, save_dir, fig_title='roi_' + str(cell) + '_' + index + '_pref',
                     folder='cell_response_heatmaps2', formats=['.png'])
         plt.close()
     return ax
@@ -300,7 +300,7 @@ def plot_mean_resp_heatmap_cell(df, cell, values='mean_response', index='initial
 #     if save:
 #         #     fig.tight_layout()
 #         formats = ['.png']
-#         save_figure(fig, figsize, dataset.analysis_dir, 'roi_' + str(cell), 'mean_resp_matrix_traces', formats=formats)
+#         save_figure(fig, figsize, dataset.save_dir, 'roi_' + str(cell), 'mean_resp_matrix_traces', formats=formats)
 #         plt.close()
 #         # return ax;
 #
@@ -370,7 +370,7 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
                 ax[i].set_title(img_name, color=colors[i])
                 ax[i].set_title(str(stim_code), color=colors[i])
     if save:
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='images', folder='behavior', formats=['.png'])
+        save_figure(fig, figsize, dataset.save_dir, fig_title='images', folder='behavior', formats=['.png'])
         plt.close()
     return ax
 
@@ -379,7 +379,7 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
 
 #
 #
-# def plot_mean_trace(cond_df, xlim=[-1, 3], color='k', label=None, title=None, xspan=True, analysis_dir=False, folder=None,
+# def plot_mean_trace(cond_df, xlim=[-1, 3], color='k', label=None, title=None, xspan=True, save_dir=False, folder=None,
 #                     save_title=None, ax=None):
 #     if ax is None:
 #         figsize = (5, 4)
@@ -408,9 +408,9 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
 #         if label:
 #             ax.legend(loc='upper right')
 #             #             ax.legend(bbox_to_anchor=(1.55, 1.05))
-#     if analysis_dir:
+#     if save_dir:
 #         fig.tight_layout()
-#         save_figure(fig, figsize, analysis_dir, save_title, folder)
+#         save_figure(fig, figsize, save_dir, save_title, folder)
 #         plt.close()
 #         ax = None
 #     return ax;
@@ -419,7 +419,7 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
 #     # In[154]:
 #
 #
-def plot_vsyncintervals(pkl, analysis_dir):
+def plot_vsyncintervals(pkl, save_dir):
     figsize = (8, 6)
     fig, ax = plt.subplots(figsize=figsize)
     ax.plot(pkl['vsyncintervals'])
@@ -429,7 +429,7 @@ def plot_vsyncintervals(pkl, analysis_dir):
     title = str(pkl['dropped_frame_count']) + '/' + str(pkl['vsynccount']) + ' (' + str(dropped_frames) + '%)'
     ax.set_title(title + ' dropped frames')
     plt.tight_layout()
-    save_figure(fig, figsize, analysis_dir, 'dropped_frames', 'behavior')
+    save_figure(fig, figsize, save_dir, 'dropped_frames', 'behavior')
 
 
 #
@@ -451,7 +451,7 @@ def plot_vsyncintervals(pkl, analysis_dir):
 #     ax.set_ylabel('dF/F')
 #     ax.set_title('cell ' + str(cell) + ' - go trials, ' + code + ' = ' + str(img_num))
 #
-#     save_figure(fig, figsize, dataset.analysis_dir, fig_title='cell_' + str(cell) + '_' + code, folder='return_to_baseline')
+#     save_figure(fig, figsize, dataset.save_dir, fig_title='cell_' + str(cell) + '_' + code, folder='return_to_baseline')
 #     plt.close()
 #
 #
@@ -497,7 +497,7 @@ def plot_engaged_disengaged(dataset, cell, sdf, code='change_code', save=False, 
         plt.legend(loc='upper right', bbox_to_anchor=(1.5, 1.0))
         ax.set_title('cell ' + str(cell) + ' - ' + str(img_num))
         fig.tight_layout()
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='cell_' + str(cell), folder='task_engagement')
+        save_figure(fig, figsize, dataset.save_dir, fig_title='cell_' + str(cell), folder='task_engagement')
         plt.close()
     else:
         plt.legend(loc='upper right', bbox_to_anchor=(0.85, 1.35))
@@ -544,7 +544,7 @@ def plot_running_not_running(dataset, cell, sdf, code='change_code', save=False,
         plt.legend(loc='upper right', bbox_to_anchor=(1.5, 1.0))
         ax.set_title('cell ' + str(cell) + ' - ' + str(img_num))
         fig.tight_layout()
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='cell_' + str(cell), folder='task_engagement')
+        save_figure(fig, figsize, dataset.save_dir, fig_title='cell_' + str(cell), folder='task_engagement')
         plt.close()
     else:
         plt.legend(loc='upper right', bbox_to_anchor=(0.85, 1.35))
@@ -594,7 +594,7 @@ def plot_running_not_running(dataset, cell, sdf, code='change_code', save=False,
 #                         plt.tight_layout()
 #         if save:
 #             fig_title = 'roi_' + str(cell)
-#             fig_dir = os.path.join(dataset.analysis_dir, 'trial_type_responses')
+#             fig_dir = os.path.join(dataset.save_dir, 'trial_type_responses')
 #             if not os.path.exists(fig_dir):
 #                 os.mkdir(fig_dir)
 #             saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=(10, 5))
@@ -820,7 +820,7 @@ def addSpan(ax, amin, amax, color='k', alpha=0.3, axtype='x', zorder=1):
 def add_stim_color_span(dataset, ax, stim_code=None):
     if stim_code is not None:
         stim_list = [stim_code]
-    colors = get_colors_for_stim_codes(np.sort(dataset.stim_codes.stim_code.unique()))
+    colors = get_colors_for_stim_codes(np.sort(dataset.stim_codes.change_code.unique()))
     amin = 0
     for idx in dataset.stim_table.index:
         amax = dataset.stim_table.loc[idx]['change_time']
@@ -889,7 +889,7 @@ def plot_behavior_events_trace(dataset, cell_list, xmin=360, length=3, ax=None, 
 #     ax.set_yticks(np.arange(0, 70, 20))
 #     plt.tight_layout()
 #     if save:
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title='run_speed', folder='behavior_events_traces')
+#         save_figure(fig, figsize, dataset.save_dir, fig_title='run_speed', folder='behavior_events_traces')
 #         plt.close()
 #         ax = None
 #     return ax
@@ -920,7 +920,7 @@ def plot_behavior_events_trace(dataset, cell_list, xmin=360, length=3, ax=None, 
 #         ax.set_yticklabels(y_array[::-1]);
 #         if save:
 #             plt.tight_layout()
-#             save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell), folder='all_trials_heatmap')
+#             save_figure(fig, figsize, dataset.save_dir, fig_title='roi_' + str(cell), folder='all_trials_heatmap')
 #             plt.close()
 #             ax = None
 #     return ax
@@ -985,10 +985,10 @@ def plot_transition_type_heatmap(dataset, mdf, cell_list, cmap='jet', vmax=None,
         plt.tight_layout()
         if save:
             if vmax is None:
-                save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+                save_figure(fig, figsize, dataset.save_dir, fig_title='roi_' + str(cell),
                             folder='transition_type_heatmap')
             else:
-                save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+                save_figure(fig, figsize, dataset.save_dir, fig_title='roi_' + str(cell),
                             folder='transition_type_heatmap_vmax', formats=['.png'])
             plt.close()
             ax = None
@@ -1033,7 +1033,7 @@ def plot_transition_type_heatmap(dataset, mdf, cell_list, cmap='jet', vmax=None,
 #     cb.set_label('mean dF/F')
 #     # plt.tight_layout()
 #     if save:
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title='all_cells_mean_response_rb',
+#         save_figure(fig, figsize, dataset.save_dir, fig_title='all_cells_mean_response_rb',
 #                     folder='transition_type_heatmap')
 #         plt.close()
 #     return ax
@@ -1079,7 +1079,7 @@ def plot_transition_type_heatmap(dataset, mdf, cell_list, cmap='jet', vmax=None,
 #     if save:
 #         if cmap == cmaps.plasma:
 #             cmap = 'plasma'
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title='all_cells_mean_response_dF_' + cmap,
+#         save_figure(fig, figsize, dataset.save_dir, fig_title='all_cells_mean_response_dF_' + cmap,
 #                     folder='transition_type_heatmap')
 #         plt.close()
 #     return ax
@@ -1124,7 +1124,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
             #     plt.colorbar(cax,ax=ax[i])
         plt.tight_layout()
     if save:
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='sig_cells_stim_' + str(change_code),
+        save_figure(fig, figsize, dataset.save_dir, fig_title='sig_cells_stim_' + str(change_code),
                     folder='transition_type_heatmap')
         plt.close()
     return ax
@@ -1133,7 +1133,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #
 # # In[397]:
 #
-# def plot_behavior_performance_sns(pkl, pkl_df, analysis_dir=None, save=False):
+# def plot_behavior_performance_sns(pkl, pkl_df, save_dir=None, save=False):
 #     figsize = (8, 15)
 #     fig, ax = plt.subplots(figsize=figsize)
 #     pkl_df = pkl_df[pkl_df.trial_type != 'aborted']  # only change trials
@@ -1157,7 +1157,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #     if save:
 #         fig.tight_layout()
 #         fig_title = 'behavior_performance_sns'
-#         saveFigure(fig, os.path.join(analysis_dir, 'behavior', fig_title), formats=['.png'], size=figsize)
+#         saveFigure(fig, os.path.join(save_dir, 'behavior', fig_title), formats=['.png'], size=figsize)
 #         plt.close()
 #
 #
@@ -1193,8 +1193,8 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #     ax.set_title(dataset.pkl['mouseid'] + '-' + dataset.pkl['startdatetime'][:10])
 #     if save:
 #         fig_title = 'behavior_performance_rk'
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title, 'behavior')
-#     # saveFigure(fig,os.path.join(dataset.analysis_dir,fig_title),formats = ['.png'],size=figsize)
+#         save_figure(fig, figsize, dataset.save_dir, fig_title, 'behavior')
+#     # saveFigure(fig,os.path.join(dataset.save_dir,fig_title),formats = ['.png'],size=figsize)
 #     return ax
 #
 #
@@ -1227,8 +1227,8 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #     ax.set_title(dataset.pkl['mouseid'] + '-' + dataset.pkl['startdatetime'][:10])
 #     if save:
 #         fig_title = 'behavior_performance'
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title, 'behavior')
-#     # saveFigure(fig,os.path.join(dataset.analysis_dir,fig_title),formats = ['.png'],size=figsize)
+#         save_figure(fig, figsize, dataset.save_dir, fig_title, 'behavior')
+#     # saveFigure(fig,os.path.join(dataset.save_dir,fig_title),formats = ['.png'],size=figsize)
 #     return ax
 #
 #
@@ -1236,7 +1236,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #
 # def plot_mean_image_response_trial_type(dataset, mdf, cell_list, ax=None, save=False):
 #     fig_folder = 'mean_image_response_trial_type'
-#     fig_dir = os.path.join(dataset.analysis_dir, fig_folder)
+#     fig_dir = os.path.join(dataset.save_dir, fig_folder)
 #     if not os.path.exists(fig_dir): os.mkdir(fig_dir)
 #     sc = dataset.stim_codes
 #     stim_codes = np.sort(mdf.stim_code.unique())
@@ -1274,7 +1274,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #
 # def plot_mean_trial_type_response_by_image(dataset, mdf, cell_list, ax=None, save=False):
 #     fig_folder = 'mean_trial_type_response_by_image'
-#     fig_dir = os.path.join(dataset.analysis_dir, fig_folder)
+#     fig_dir = os.path.join(dataset.save_dir, fig_folder)
 #     if not os.path.exists(fig_dir): os.mkdir(fig_dir)
 #     df = dataset.df
 #     colors = ['r', 'k']
@@ -1343,7 +1343,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #         if save:
 #             fig.tight_layout()
 #             fig_title = 'roi_' + str(cell) + '_' + str(stim_code)
-#             fig_dir = os.path.join(dataset.analysis_dir, 'trial_type_responses_separated')
+#             fig_dir = os.path.join(dataset.save_dir, 'trial_type_responses_separated')
 #             if not os.path.exists(fig_dir):
 #                 os.mkdir(fig_dir)
 #             saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -1381,7 +1381,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #         if save:
 #
 #             fig_title = 'roi_' + str(cell) + '_' + str(stim_code)
-#             fig_dir = os.path.join(dataset.analysis_dir, 'trial_type_responses_column')
+#             fig_dir = os.path.join(dataset.save_dir, 'trial_type_responses_column')
 #             if not os.path.exists(fig_dir):
 #                 os.mkdir(fig_dir)
 #             saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -1421,7 +1421,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #         fig.tight_layout()
 #     if save:
 #         fig_title = 'roi_' + str(cell)
-#         fig_dir = os.path.join(dataset.analysis_dir, 'trial_type_responses_row')
+#         fig_dir = os.path.join(dataset.save_dir, 'trial_type_responses_row')
 #         if not os.path.exists(fig_dir):
 #             os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -1461,7 +1461,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #         plt.tight_layout()
 #         plt.gcf().subplots_adjust(right=.83)
 #         fig_title = 'roi_' + str(cell)
-#         fig_dir = os.path.join(dataset.analysis_dir, 'trial_type_responses_overlay')
+#         fig_dir = os.path.join(dataset.save_dir, 'trial_type_responses_overlay')
 #         if not os.path.exists(fig_dir):
 #             os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -1507,7 +1507,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #         plt.tight_layout()
 #         plt.gcf().subplots_adjust(top=.85)
 #         fig_title = 'roi_' + str(cell)
-#         fig_dir = os.path.join(dataset.analysis_dir, 'stim_responses_' + str(window[1]) + 's')
+#         fig_dir = os.path.join(dataset.save_dir, 'stim_responses_' + str(window[1]) + 's')
 #         if not os.path.exists(fig_dir):
 #             os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -1572,7 +1572,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #         plt.suptitle('cell ' + str(cell), x=0.55, y=1, horizontalalignment='center')
 #         if save:
 #             plt.gcf().subplots_adjust(left=0.2)
-#             save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+#             save_figure(fig, figsize, dataset.save_dir, fig_title='roi_' + str(cell),
 #                         folder='trial_types_selectivity_' + str(window))
 #             plt.close()
 #         return ax
@@ -1628,7 +1628,7 @@ def plot_trial_types_selectivity_ns(dataset, mdf, cell_list, window=2, save=Fals
             plt.suptitle('cell ' + str(cell), x=0.47, y=1, horizontalalignment='center')
             fig.tight_layout()
             plt.gcf().subplots_adjust(right=0.85)
-            save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+            save_figure(fig, figsize, dataset.save_dir, fig_title='roi_' + str(cell),
                         folder='trial_types_selectivity_' + str(window))
             plt.close()
             ax = None
@@ -1682,7 +1682,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
             ax.set_title('cell ' + str(cell))
             fig.tight_layout()
             plt.gcf().subplots_adjust(right=0.75)
-            save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell) + '_ttspi',
+            save_figure(fig, figsize, dataset.save_dir, fig_title='roi_' + str(cell) + '_ttspi',
                         folder='trial_types_selectivity_pref_image')
             plt.close()
         else:
@@ -1726,7 +1726,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #             ax[x].set_ylim([0, 1.6])
 #             plt.legend()
 #             plt.tight_layout()
-#     save_figure(fig, figsize, dataset.analysis_dir,
+#     save_figure(fig, figsize, dataset.save_dir,
 #                 fig_title=response_types[0] + '_' + response_types[1] + 'selective_cells', folder='selectivity')
 #
 #
@@ -1779,7 +1779,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #     if save:
 #         plt.gcf().subplots_adjust(top=.87)
 #         fig_title = 'roi_' + str(cell) + '_2'
-#         fig_dir = os.path.join(dataset.analysis_dir, 'trial_type_responses_row_with_stim')
+#         fig_dir = os.path.join(dataset.save_dir, 'trial_type_responses_row_with_stim')
 #         if not os.path.exists(fig_dir):
 #             os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -1914,7 +1914,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #     if save:
 #         fig_title = 'roi_' + str(cell) + '_' + response_type + '_trial_' + str(cdf.trial.values[trial]) + '_' + str(
 #             change_code)
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title, fig_folder)
+#         save_figure(fig, figsize, dataset.save_dir, fig_title, fig_folder)
 #         plt.close()
 #
 #
@@ -1968,7 +1968,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #     if save:
 #         #         fig.tight_layout()
 #         fig_title = 'mean_behavior_events_' + response_type + '_' + str(window[1]) + 's'
-#         save_figure(fig, figsize, dataset.analysis_dir, fig_title, fig_folder)
+#         save_figure(fig, figsize, dataset.save_dir, fig_title, fig_folder)
 #         plt.close()
 #
 #
@@ -2010,7 +2010,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #     ax[2].set_ylabel('run speed (cm/s)')
 #     ax[3].set_xlabel('time after change (sec)')
 #     plt.tight_layout()
-#     save_figure(fig, figsize, dataset.analysis_dir, fig_title='avg_run_speed_' + str(window[1]) + 's',
+#     save_figure(fig, figsize, dataset.save_dir, fig_title='avg_run_speed_' + str(window[1]) + 's',
 #                 folder='behavior_events')
 #
 #
@@ -2079,7 +2079,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #     if save:
 #         plt.gcf().subplots_adjust(right=.73)
 #         fig_title = 'roi_' + str(cell) + '_' + response_types[0] + '_' + response_types[1] + '_' + str(change_code)
-#         fig_dir = os.path.join(dataset.analysis_dir, 'auroc')
+#         fig_dir = os.path.join(dataset.save_dir, 'auroc')
 #         if not os.path.exists(fig_dir):
 #             os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -2130,7 +2130,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #         fig.tight_layout()
 #         #         plt.gcf().subplots_adjust(right=.73)
 #         fig_title = 'roi_' + str(cell)
-#         fig_dir = os.path.join(dataset.analysis_dir, 'auroc2')
+#         fig_dir = os.path.join(dataset.save_dir, 'auroc2')
 #         if not os.path.exists(fig_dir):
 #             os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
@@ -2273,7 +2273,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 #         plt.tight_layout()
 #         fig_folder = 'metric_masks'
 #         fig_title = metric_name
-#         fig_dir = os.path.join(dataset.analysis_dir, fig_folder)
+#         fig_dir = os.path.join(dataset.save_dir, fig_folder)
 #         if not os.path.exists(fig_dir): os.mkdir(fig_dir)
 #         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'])
 #
@@ -2283,7 +2283,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
 
 
 
-def plot_mdf_metric_dist(mdf, metric, expt_id, sig_cells=False, ax=None, analysis_dir=None, show=True):
+def plot_mdf_metric_dist(mdf, metric, expt_id, sig_cells=False, ax=None, save_dir=None, show=True):
     if sig_cells:
         tmp = mdf[mdf.sig_thresh == True]
         title = metric + '_sig_cells'
@@ -2302,8 +2302,8 @@ def plot_mdf_metric_dist(mdf, metric, expt_id, sig_cells=False, ax=None, analysi
         ax[0].set_ylabel(metric)
         ax[i].set_xlabel(response_type)
         plt.suptitle(expt_id, y=1.)
-    if analysis_dir:
-        save_figure(fig, figsize, analysis_dir, title, 'response_variability')
+    if save_dir:
+        save_figure(fig, figsize, save_dir, title, 'response_variability')
     if not show:
         plt.close()
 
@@ -2344,7 +2344,7 @@ def plot_mean_response_heatmap_ns(dataset, mdf, sorted_cell_ids, cmap='magma', s
     cb.set_label('mean dF/F')
     plt.tight_layout()
     if save:
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='all_cells_mean_response_by_trial_type',
+        save_figure(fig, figsize, dataset.save_dir, fig_title='all_cells_mean_response_by_trial_type',
                     folder='transition_type_heatmap')
         plt.close()
     return ax
@@ -2352,7 +2352,7 @@ def plot_mean_response_heatmap_ns(dataset, mdf, sorted_cell_ids, cmap='magma', s
 
 # In[ ]:
 
-def plot_single_cell_variability(df, cell, ax=None, analysis_dir=None):
+def plot_single_cell_variability(df, cell, ax=None, save_dir=None):
     figsize = (6, 6)
     if ax is None:
         fig, ax = plt.subplots(1, 2, figsize=figsize, sharey=True)
@@ -2369,8 +2369,8 @@ def plot_single_cell_variability(df, cell, ax=None, analysis_dir=None):
         ax[i].set_title('CV: ' + str(np.round(CV, 2)))
         ax[i].set_xlabel(trial_type)
     plt.suptitle('cell ' + str(cell), y=1.05)
-    if analysis_dir is not None:
-        save_figure(fig, figsize, analysis_dir, 'roi_' + str(cell), 'response_variability')
+    if save_dir is not None:
+        save_figure(fig, figsize, save_dir, 'roi_' + str(cell), 'response_variability')
         plt.close()
     return ax
 
@@ -2378,7 +2378,7 @@ def plot_single_cell_variability(df, cell, ax=None, analysis_dir=None):
 # In[ ]:
 
 def plot_response_matrix(mdf, values, index, columns, cell_label='cell', remove_cells=None, fig_length=5,
-                         sig=True, ax=None, analysis_dir=None, show=True, yticks=True):
+                         sig=True, ax=None, save_dir=None, show=True, yticks=True):
     if sig:
         title = values + '_' + columns[0] + '_' + index[0] + '_sig'
         sig_cells = mdf[mdf.sig_thresh == True][cell_label].unique()
@@ -2403,10 +2403,10 @@ def plot_response_matrix(mdf, values, index, columns, cell_label='cell', remove_
         ax.set_yticks(np.arange(0, len(tmp[cell_label].unique()), spacing))
         ax.set_yticklabels(np.arange(0, len(tmp[cell_label].unique()), spacing))
     # ax.set_yticklabels(np.arange(0,len(tmp[cell_label].unique()),spacing)[::-1])
-    if analysis_dir:
+    if save_dir:
         fig.tight_layout()
         #        plt.gcf().subplots_adjust(right=.82)
-        save_figure(fig, figsize, analysis_dir, title, 'response_matrix', formats=['.png'])
+        save_figure(fig, figsize, save_dir, title, 'response_matrix', formats=['.png'])
     if not show:
         plt.close()
     return ax
@@ -2414,7 +2414,7 @@ def plot_response_matrix(mdf, values, index, columns, cell_label='cell', remove_
 
 # In[ ]:
 
-def plot_adaptation(mdf, cell, mean_window, ratio='r2_r1', analysis_dir=None):
+def plot_adaptation(mdf, cell, mean_window, ratio='r2_r1', save_dir=None):
     sns.set_context('poster', font_scale=1.5, rc={'lines.markeredgewidth': 2})
     frame_int = 0.7 * 30  # flashes happen every 700ms
     stim_start_frame = (mean_window[0] * 30)  # change time
@@ -2451,16 +2451,16 @@ def plot_adaptation(mdf, cell, mean_window, ratio='r2_r1', analysis_dir=None):
             ax[i].set_title(response_type + ' - ratio: ' + str(r))
             ax[i].set_xlabel('time after change (s)')
         plt.suptitle('cell ' + str(cell), y=0.98, x=0.52)
-    if analysis_dir is not None:
+    if save_dir is not None:
         fig.tight_layout()
         plt.gcf().subplots_adjust(top=0.80)
-        save_figure(fig, figsize, analysis_dir, 'roi_' + str(cell), 'response_ratio_' + ratio)
+        save_figure(fig, figsize, save_dir, 'roi_' + str(cell), 'response_ratio_' + ratio)
         plt.close()
 
 
 # In[ ]:
 #
-# def plot_mdf_metric_dist(mdf,metric,expt_id,sig_cells=False,ax=None,analysis_dir=None,show=True):
+# def plot_mdf_metric_dist(mdf,metric,expt_id,sig_cells=False,ax=None,save_dir=None,show=True):
 #    if sig_cells:
 #        tmp = mdf[mdf.sig_thresh==True]
 #        title = metric+'_sig_cells'
@@ -2481,8 +2481,8 @@ def plot_adaptation(mdf, cell, mean_window, ratio='r2_r1', analysis_dir=None):
 #        ax[0].set_ylabel(metric)
 #        ax[i].set_xlabel(response_type)
 #        plt.suptitle(expt_id,y=1.)
-#    if analysis_dir:
-#        save_figure(fig,figsize,analysis_dir,title,'response_variability')
+#    if save_dir:
+#        save_figure(fig,figsize,save_dir,title,'response_variability')
 #    if not show:
 #        plt.close()
 #
@@ -2523,7 +2523,7 @@ def plot_adaptation(mdf, cell, mean_window, ratio='r2_r1', analysis_dir=None):
 #    cb.set_label('mean dF/F')
 #    plt.tight_layout()
 #    if save:
-#        save_figure(fig,figsize,dataset.analysis_dir,fig_title='all_cells_mean_response_by_trial_type',folder='transition_type_heatmap')
+#        save_figure(fig,figsize,dataset.save_dir,fig_title='all_cells_mean_response_by_trial_type',folder='transition_type_heatmap')
 #        plt.close()
 #    return ax
 
@@ -2533,20 +2533,21 @@ def get_upper_limit_and_intervals(dataset):
     upper = np.round(traces[0].shape[0], -3) + 1000
     times = dataset.sync['2PFrames']['timestamps']
     interval = 5 * 60
-    frame_interval = np.arange(0, len(traces[0, :]), interval * 30)
+    frame_interval = np.arange(0, len(dataset.traces[0, :]), interval * 30)
     time_interval = np.uint64(np.round(np.arange(times[0], times[-1], interval), 1))
     return upper, time_interval, frame_interval
 
 
-def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
+def plot_traces_heatmap(dataset, trace_type='dFF', baseline_method='percentile', cmap='magma', save=False,
+                        cbar=True, ax=None):
     sns.set_context('notebook', font_scale=2, rc={'lines.markeredgewidth': 1})
     traces = dataset.dff_traces
     upper_limit, time_interval, frame_interval = get_upper_limit_and_intervals(dataset)
     if ax is None:
         figsize = (20, 8)
         fig, ax = plt.subplots(figsize=figsize)
-    cax = ax.pcolormesh(traces, cmap='magma', vmin=0, vmax=np.percentile(traces[np.isnan(traces)==False], 99))
-    # cax = ax.pcolormesh(traces, cmap=cmap, vmin=np.percentile(traces, 5), vmax=np.percentile(traces, 95))
+    cax = ax.pcolormesh(traces, cmap='magma', vmin=0, vmax=np.percentile(traces, 99))
+    # cax = ax.pcolormesh(traces, cmap=cmap, vmin=np.percentile(traces, 1), vmax=np.percentile(traces, 99))
     ax.set_ylim(0, traces.shape[0])
     #    ax.set_xlim(0,traces.shape[1])
     ax.set_ylabel('cells')
@@ -2566,8 +2567,8 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
         c = '0'
     # fig.tight_layout()
     if save:
-        title = 'dff_traces_heatmap_' + c
-        save_figure(fig, figsize, dataset.analysis_dir, title, 'traces', formats=['.png'])
+        title = trace_type + '_traces_' + baseline_method + '_heatmap_' + cmap + '_' + c
+        save_figure(fig, figsize, dataset.save_dir, title, 'traces', formats=['.png'])
     return ax
 
 
@@ -2601,12 +2602,12 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
 #     #     fig.tight_layout()
 #     plt.gcf().subplots_adjust(bottom=0.2)
 #     if save:
-#         save_figure(fig, figsize, dataset.analysis_dir, 'run_reward', 'behavior', formats=['.png'])
+#         save_figure(fig, figsize, dataset.save_dir, 'run_reward', 'behavior', formats=['.png'])
 #
 #
 # # In[ ]:
 #
-# def plot_response_types_CV(df, mdf, cell, mean_window, analysis_dir=None):
+# def plot_response_types_CV(df, mdf, cell, mean_window, save_dir=None):
 #     sns.set_context('poster', font_scale=1.5, rc={'lines.markeredgewidth': 2})
 #     frame_int = 0.7 * 30  # flashes happen every 700ms
 #     stim_start_frame = (mean_window[0] * 30)  # change time
@@ -2641,16 +2642,16 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
 #             ax[i].set_title(response_type + ' - CV: ' + str(CV))
 #             ax[i].set_xlabel('time after change (s)')
 #         plt.suptitle('cell ' + str(cell), y=0.98, x=0.52)
-#     if analysis_dir is not None:
+#     if save_dir is not None:
 #         fig.tight_layout()
 #         plt.gcf().subplots_adjust(top=0.80)
-#         save_figure(fig, figsize, analysis_dir, 'roi_' + str(cell), 'response_types_CV')
+#         save_figure(fig, figsize, save_dir, 'roi_' + str(cell), 'response_types_CV')
 #         plt.close()
 #
 #
 # # In[ ]:
 #
-# def plot_trial_types_CV(df, cell, mean_window, analysis_dir=None):
+# def plot_trial_types_CV(df, cell, mean_window, save_dir=None):
 #     sns.set_context('poster', font_scale=1.5, rc={'lines.markeredgewidth': 2})
 #     frame_int = 0.7 * 30  # flashes happen every 700ms
 #     stim_start_frame = (mean_window[0] * 30)  # change time
@@ -2685,10 +2686,10 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
 #             ax[i].set_title(trial_type + ' - CV: ' + str(CV))
 #             ax[i].set_xlabel('time after change (s)')
 #         plt.suptitle('cell ' + str(cell), y=0.98, x=0.52)
-#     if analysis_dir is not None:
+#     if save_dir is not None:
 #         fig.tight_layout()
 #         plt.gcf().subplots_adjust(top=0.80)
-#         save_figure(fig, figsize, analysis_dir, 'roi_' + str(cell), 'trial_type_CV')
+#         save_figure(fig, figsize, save_dir, 'roi_' + str(cell), 'trial_type_CV')
 #         plt.close()
 #
 #
@@ -2729,7 +2730,7 @@ def plot_cell_zoom(dataset, cell, spacex=10, spacey=10, show_mask=False, save=Fa
             folder = 'roi_masks_zoom'
         else:
             folder = 'roi_zoom'
-        save_figure(fig, figsize, dataset.analysis_dir, 'roi_' + str(cell), folder, formats=['.png'])
+        save_figure(fig, figsize, dataset.save_dir, 'roi_' + str(cell), folder, formats=['.png'])
         plt.close()
 
 
@@ -2790,13 +2791,13 @@ def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
     ##
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(0, 0.2), yspan=(.77, 1))
     ax = plot_mean_resp_heatmap_cell(dataset.df, cell, values='mean_response', index='initial_code',
-                                     columns='change_code', analysis_dir=None, ax=ax)
+                                     columns='change_code', save_dir=None, ax=ax)
 
     fig.tight_layout()
 
     if save:
         fig_title = dataset.expt_id + '-roi_' + str(cell)
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title, 'cell_summary_plots')
+        save_figure(fig, figsize, dataset.save_dir, fig_title, 'cell_summary_plots')
         plt.close()
 
 
@@ -2816,7 +2817,7 @@ def plot_experiment_summary_figure(dataset, mdf, sdf, rdf, save=False):
     ax = plot_behavior(dataset.pkl_df, ax=ax)
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.18, 0.94), yspan=(0, .3))
-    ax = plot_traces_heatmap(dataset, cbar=True, ax=ax)
+    ax = plot_traces_heatmap(dataset, cmap='magma', cbar=True, ax=ax)
 
     ###behavior figures
     times = dataset.sync['visualFrames']['timestamps'][:len(dataset.run_speed)]
@@ -2901,6 +2902,6 @@ def plot_experiment_summary_figure(dataset, mdf, sdf, rdf, save=False):
 
     save = True
     if save:
-        save_figure(fig, figsize, dataset.analysis_dir, dataset.expt_id + '_DoC', 'expt_summary', formats=['.png'])
-        analysis_dir = r'\\aibsdata2\nc-ophys\BehaviorImaging\DoC'
-        save_figure(fig, figsize, analysis_dir, dataset.expt_id + '_DoC', 'experiment_summaries')
+        save_figure(fig, figsize, dataset.save_dir, dataset.expt_id + '_DoC', 'expt_summary', formats=['.png'])
+        save_dir = r'\\aibsdata2\nc-ophys\BehaviorImaging\DoC'
+        save_figure(fig, figsize, save_dir, dataset.expt_id + '_DoC', 'experiment_summaries')

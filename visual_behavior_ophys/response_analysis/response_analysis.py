@@ -164,7 +164,7 @@ class ResponseAnalysis(object):
         return self.response_df
 
     def get_response_dataframe(self):
-        response_df_file = [file for file in os.listdir(self.save_dir) if file.endswith('response_dataframe.hdf')]
+        response_df_file = [file for file in os.listdir(self.save_dir) if file.endswith('response_dataframe.h5')]
         if len(response_df_file) > 0:
             print 'loading response dataframe'
             self.response_df = pd.read_hdf(os.path.join(self.save_dir, response_df_file[0]))
@@ -173,7 +173,7 @@ class ResponseAnalysis(object):
             print 'generating response dataframe'
             self.response_df = self.generate_response_dataframe()
             print 'saving response dataframe'
-            response_df_file_path = os.path.join(self.save_dir, 'response_dataframe.hdf')
+            response_df_file_path = os.path.join(self.save_dir, 'response_dataframe.h5')
             self.response_df.to_hdf(response_df_file_path, key='df', format='fixed')
             # self.save_df_as_hdf(self.response_df,response_df_file_path)
             print 'done'

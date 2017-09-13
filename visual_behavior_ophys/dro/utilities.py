@@ -9,12 +9,12 @@ from fnmatch import fnmatch
 import socket
 import warnings
 
-try:
-    import imaging_behavior.core.utilities as ut
-    import imaging_behavior.plotting.plotting_functions as pf
-    import imaging_behavior.plotting.utilities as pu
-except:
-    pass
+# try:
+#     import imaging_behavior.core.utilities as ut
+#     import imaging_behavior.plotting.plotting_functions as pf
+#     import imaging_behavior.plotting.utilities as pu
+# except:
+#     pass
 
 
 def create_doc_dataframe(filename):

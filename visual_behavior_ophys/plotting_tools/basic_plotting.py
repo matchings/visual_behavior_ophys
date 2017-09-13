@@ -43,7 +43,7 @@ def plot_mask_on_max_proj(self, cell_list, ax=None, save=False):
             plt.tight_layout()
             fig_folder = 'roi_masks'
             fig_title = 'roi_' + str(roi)
-            fig_dir = os.path.join(self.save_dir, fig_folder)
+            fig_dir = os.path.join(self.analysis_dir, fig_folder)
             if not os.path.exists(fig_dir): os.mkdir(fig_dir)
             saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'])
             plt.close()
@@ -90,7 +90,7 @@ def plot_traces(dataset, traces_list):
         ax[i].set_ylabel(str(roi))
     plt.show()
     fig_title = 'dff_traces'
-    saveFigure(fig, os.path.join(dataset.save_dir, fig_title), formats=['.png'], size=(15, 10))
+    saveFigure(fig, os.path.join(dataset.analysis_dir, fig_title), formats=['.png'], size=(15, 10))
 
 
 def plot_traces_heatmap(self, traces, trace_type='dFF', baseline_method='percentile', cmap='magma', save=False):
@@ -108,16 +108,15 @@ def plot_traces_heatmap(self, traces, trace_type='dFF', baseline_method='percent
     if save:
         plt.tight_layout()
         fig_title = trace_type + '_traces_' + baseline_method + '_heatmap_' + cmap
-        fig_dir = os.path.join(self.save_dir, 'traces')
+        fig_dir = os.path.join(self.analysis_dir, 'traces')
         if not os.path.exists(fig_dir):
             os.mkdir(fig_dir)
         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
         plt.close()
     return fig, ax
 
-def plot_all_trials(self):
-    plt.ioff()
-    df = self.df
+def plot_all_trials(dataset, response_df):
+    df = response_df
     for cell in df.cell.unique():
         figsize = (6, 5)
         fig, ax = plt.subplots(figsize=figsize)
@@ -127,14 +126,14 @@ def plot_all_trials(self):
             timestamps = timestamps - timestamps[0]
             ax.plot(timestamps, trace)
             ax.set_title('roi ' + str(cell) + ' - all trials')
-            ax.set_xticks(np.arange(self.window[0] - self.window[0], self.window[1] - self.window[0] + 1, 1))
-            ax.set_xticklabels(np.arange(self.window[0], self.window[1] + 1, 1))
+            ax.set_xticks(np.arange(dataset.window[0] - dataset.window[0], dataset.window[1] - dataset.window[0] + 1, 1))
+            ax.set_xticklabels(np.arange(dataset.window[0], dataset.window[1] + 1, 1))
             ax.set_ylabel('dFF')
             ax.set_xlabel('time(s)')
         fig.tight_layout()
         fig_folder = 'all_trials'
         fig_title = 'roi_' + str(cell)
-        fig_dir = os.path.join(self.save_dir, fig_folder)
+        fig_dir = os.path.join(dataset.analysis_dir, fig_folder)
         if not os.path.exists(fig_dir): os.mkdir(fig_dir)
         saveFigure(fig, os.path.join(fig_dir, fig_title), formats=['.png'], size=figsize)
         plt.close()

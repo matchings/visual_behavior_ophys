@@ -15,15 +15,14 @@ from visual_behavior_ophys.roi_mask_analysis import roi_mask_analysis as rm
 
 
 class VisualBehaviorScientificaDataset(object):
-    def __init__(self, ophys_session_dir, mouse_id, filter_edge_cells=True, analysis_dir=None):
+    def __init__(self, ophys_session_dir, mouse_id, filter_edge_cells=True):
         """initialize visual behavior ophys experiment dataset
 
-			Parameters
-			----------
-			expt_session_id : ophys experiment session ID
-			mouse_id : 6-digit mouse ID
-		"""
-        self.analysis_dir = analysis_dir
+            Parameters
+            ----------
+            expt_session_id : ophys experiment session ID
+            mouse_id : 6-digit mouse ID
+        """
         self.mouse_id = mouse_id
         self.ophys_session_dir = ophys_session_dir
         self.session_id = ophys_session_dir.split('_')[-1]
@@ -45,6 +44,7 @@ class VisualBehaviorScientificaDataset(object):
         self.get_max_projection()
         self.get_dff_traces()
 
+
     def get_directories(self):
         self.ophys_experiment_dir = os.path.join(self.ophys_session_dir, 'ophys_experiment_' + str(self.experiment_id))
         self.demix_dir = os.path.join(self.ophys_experiment_dir, 'demix')
@@ -54,17 +54,9 @@ class VisualBehaviorScientificaDataset(object):
         self.get_analysis_dir()
 
     def get_analysis_dir(self):
-        if self.analysis_dir is None:
-            analysis_dir = os.path.join(self.ophys_experiment_dir, 'analysis')
-            if not os.path.exists(analysis_dir):
-                os.mkdir(analysis_dir)
-        else:
-            analysis_dir = os.path.join(self.analysis_dir, self.session_id)
-            if not os.path.exists(analysis_dir):
-                os.mkdir(analysis_dir)
-            analysis_dir = os.path.join(analysis_dir, 'analysis')
-            if not os.path.exists(analysis_dir):
-                os.mkdir(analysis_dir)
+        analysis_dir = os.path.join(self.ophys_experiment_dir, 'analysis')
+        if not os.path.exists(analysis_dir):
+            os.mkdir(analysis_dir)
         self.analysis_dir = analysis_dir
 
     def get_ophys_metadata(self):
@@ -98,16 +90,14 @@ class VisualBehaviorScientificaDataset(object):
         vs_r_sec = vs_r / sample_freq
         vs_f_sec = vs_f / sample_freq
         vsyncs = vs_f_sec
+        print("Visual frames detected in sync: %s" % len(vsyncs))
+        print("2P frames detected in sync: %s" % len(frames_2p))
         # add lick data
         lick_1 = d.get_rising_edges('lick_1') / sample_freq
         trigger = d.get_rising_edges('2p_trigger') / sample_freq
         cam1_exposure = d.get_rising_edges('cam1_exposure') / sample_freq
         cam2_exposure = d.get_rising_edges('cam2_exposure') / sample_freq
         stim_photodiode = d.get_rising_edges('stim_photodiode') / sample_freq
-        # some experiments have 2P frames prior to stimulus start - restrict to timestamps after trigger
-        frames_2p = frames_2p[frames_2p>trigger[0]]
-        print("Visual frames detected in sync: %s" % len(vsyncs))
-        print("2P frames detected in sync: %s" % len(frames_2p))
         # put sync data in dphys format to be compatible with downstream analysis
         times_2p = {'timestamps': frames_2p}
         times_vsync = {'timestamps': vsyncs}
@@ -129,16 +119,8 @@ class VisualBehaviorScientificaDataset(object):
         return self.sync
 
     def get_pkl_path(self):
-        pkl_file = [file for file in os.listdir(self.ophys_session_dir) if 'M' + str(self.mouse_id) + '.pkl' in file]
-        if len(pkl_file) > 0:
-            self.pkl_path = os.path.join(self.ophys_session_dir, pkl_file[0])
-        else:
-            self.expt_date = [file for file in os.listdir(self.ophys_session_dir) if 'sync' in file][0].split('_')[2][2:8]
-            print self.expt_date
-            pkl_dir = os.path.join(r'\\allen\programs\braintv\workgroups\neuralcoding\Behavior\Data',
-                                   'M' + str(self.mouse_id), 'output')
-            pkl_file = [file for file in os.listdir(pkl_dir) if file.startswith(self.expt_date)][0]
-            self.pkl_path = os.path.join(pkl_dir, pkl_file)
+        pkl_file = [file for file in os.listdir(self.ophys_session_dir) if 'M' + str(self.mouse_id) + '.pkl' in file][0]
+        self.pkl_path = os.path.join(self.ophys_session_dir, pkl_file)
         return self.pkl_path
 
     def get_pkl(self):
@@ -362,3 +344,5 @@ class VisualBehaviorScientificaDataset(object):
         if self.filter_edge_cells:
             self.demixed_traces = self.filter_traces(self.demixed_traces)
         return self.demixed_traces
+
+
