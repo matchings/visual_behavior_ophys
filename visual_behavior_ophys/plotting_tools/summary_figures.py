@@ -2,6 +2,8 @@
 
 # In[130]:
 
+###### warning! not all functions are functional. rewrite for scientifica data compatibility still in progress ########
+
 import os
 import numpy as np
 import pandas as pd
@@ -928,38 +930,29 @@ def plot_behavior_events_trace(dataset, cell_list, xmin=360, length=3, ax=None, 
 #
 # # In[284]:
 
-def plot_transition_type_heatmap(dataset, mdf, cell_list, cmap='jet', vmax=None, save=False, ax=None, colorbar=True):
+def plot_transition_type_heatmap(ra, cell_list, cmap='jet', vmax=None, save=False, ax=None, colorbar=True):
     response_types = ['HIT', 'MISS', 'FA', 'CR']
-    df = dataset.df
-    if len(mdf.stim_code.unique()) == 5:
-        figsize = (15, 5)
-        rows = 1
-        cols = len(mdf.stim_code.unique())
-    elif len(mdf.stim_code.unique()) == 8:
-        figsize = (15, 10)
-        rows = 2
-        cols = len(mdf.stim_code.unique()) / 2
-    else:
-        figsize = (10, 10)
-        rows = 1
-        cols = len(mdf.stim_code.unique())
+    df = ra.response_df
+    figsize = (15, 10)
+    rows = 2
+    cols = len(df.change_code.unique()) / 2
     for cell in cell_list:
         if ax is None:
             fig, ax = plt.subplots(rows, cols, figsize=figsize, sharex=True);
             ax = ax.ravel();
         resp_types = []
-        for i, stim_code in enumerate(np.sort(mdf.stim_code.unique())):
-            im_df = df[(df.cell == cell) & (df.change_code == stim_code) & (df.trial_type != 'autorewarded')]
-            n_frames = im_df.responses.values[0].shape[0]
-            n_trials = im_df.responses.shape[0]
+        for i, change_code in enumerate(np.sort(df.change_code.unique())):
+            im_df = df[(df.cell == cell) & (df.change_code == change_code) & (df.trial_type != 'autorewarded')]
+            n_frames = im_df.response.values[0].shape[0]
+            n_trials = im_df.response.shape[0]
             response_matrix = np.empty((n_trials, n_frames))
             response_type_list = []
             segments = []
             idx = 0
             for y, response_type in enumerate(response_types):
                 segments.append(idx)
-                sub_df = im_df[(im_df.response_type == response_type)]
-                responses = sub_df.responses.values
+                sub_df = im_df[(im_df.behavioral_response_type == response_type)]
+                responses = sub_df.response.values
                 for pos, trial in enumerate(range(responses.shape[0])[::-1]):
                     #             print idx,pos,trial
                     response_matrix[idx, :] = responses[trial]
@@ -974,26 +967,24 @@ def plot_transition_type_heatmap(dataset, mdf, cell_list, cmap='jet', vmax=None,
                 ax[i].set_xlim(0, response_matrix.shape[1]);
                 ax[i].set_yticks(segments);
                 ax[i].set_xlabel('time (s)');
-                ax[i].set_xticks(np.arange(0, (dataset.window[1] * 30 - (dataset.window[0] * 30) + 30), 30));
-                ax[i].set_xticklabels(np.arange(dataset.window[0], dataset.window[1] + 1, 1));
-                change_im = \
-                    dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_name.values[0].split('_')[0]
-                ax[i].set_title(str(stim_code));
+                ax[i].set_xticks(np.arange(0, (ra.trial_window[1] * 30 - (ra.trial_window[0] * 30) + 30), 30));
+                ax[i].set_xticklabels(np.arange(ra.trial_window[0], ra.trial_window[1] + 1, 1));
+                change_im = ra.stim_codes[ra.stim_codes.stim_code == change_code].image_name.values[0].split('_')[0]
+                ax[i].set_title(str(change_code));
             resp_types.append(response_type_list)
             if colorbar:
                 plt.colorbar(cax, ax=ax[i]);
         plt.tight_layout()
         if save:
             if vmax is None:
-                save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+                save_figure(fig, figsize, ra.analysis_dir, fig_title='roi_' + str(cell),
                             folder='transition_type_heatmap')
             else:
-                save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+                save_figure(fig, figsize, ra.analysis_dir, fig_title='roi_' + str(cell),
                             folder='transition_type_heatmap_vmax', formats=['.png'])
             plt.close()
             ax = None
     return ax
-
 
 #
 # # In[279]:
