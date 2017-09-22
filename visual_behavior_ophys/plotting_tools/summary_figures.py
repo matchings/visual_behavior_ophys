@@ -10,6 +10,8 @@ import pandas as pd
 import dro
 import matplotlib.pyplot as plt
 from visual_behavior_ophys.roi_mask_analysis import roi_mask_analysis as rm
+from visual_behavior_ophys.plotting_tools import basic_plotting as bp
+from visual_behavior_ophys.dro import utilities as du
 # from visual_behavior_ophys.utilities import daily_figure_utilities as dfu
 import seaborn as sns
 
@@ -46,7 +48,7 @@ def exclude_aborted(df):
     return df
 
 
-def make_lick_raster(df, ax, xmin=-4, xmax=8, figsize=None):
+def make_lick_raster(df, ax, xmin=-4, xmax=8,figsize=None):
     df = exclude_aborted(df)
     for lap in range(len(df)):
         trialstart = df.iloc[lap]['starttime'] - df.iloc[lap]['change_time']
@@ -72,8 +74,9 @@ def make_lick_raster(df, ax, xmin=-4, xmax=8, figsize=None):
                 ax.axhspan(lap, lap + 1, -200, 200, color='#4c72b0', alpha=.5)
 
         ax.vlines(trialstart, lap, lap + 1, color='black', linewidth=1)
-        ax.vlines(licktimes, lap, lap + 1, color=[0.5,0.5,0.5], linewidth=1)
+        ax.vlines(licktimes, lap, lap + 1, color='r', linewidth=1)
         ax.vlines(0, lap, lap + 1, color=[.5, .5, .5], linewidth=1)
+
     ax.axvspan(df.iloc[0]['response_window'][0], df.iloc[0]['response_window'][1], facecolor='gray', alpha=.4,
                edgecolor='none')
     ax.grid(False)
@@ -81,7 +84,7 @@ def make_lick_raster(df, ax, xmin=-4, xmax=8, figsize=None):
     ax.set_xlim([xmin, xmax])
 
 
-def plot_behavior(pkl_df, analysis_dir=None, ax=None):
+def plot_behavior(pkl_df, save_dir=None, ax=None):
     if ax is None:
         figsize = (6, 12)
         fig, ax = plt.subplots(figsize=figsize)
@@ -91,58 +94,10 @@ def plot_behavior(pkl_df, analysis_dir=None, ax=None):
     ax.set_xlabel('time after change (s)')
     ax.set_ylabel('trials')
     plt.gca().invert_yaxis()
-    if analysis_dir:
+    if save_dir:
         fig.tight_layout()
-        save_figure(fig, figsize, analysis_dir, fig_title='behavior', folder='behavior', formats=['.png'])
+        save_figure(fig, figsize, save_dir, fig_title='behavior', folder='behavior', formats=['.png'])
     return ax
-
-
-def placeAxesOnGrid(fig, dim=[1, 1], xspan=[0, 1], yspan=[0, 1], wspace=None, hspace=None, sharex=False, sharey=False):
-    '''
-    Takes a figure with a gridspec defined and places an array of sub-axes on a portion of the gridspec
-
-    Takes as arguments:
-        fig: figure handle - required
-        dim: number of rows and columns in the subaxes - defaults to 1x1
-        xspan: fraction of figure that the subaxes subtends in the x-direction (0 = left edge, 1 = right edge)
-        yspan: fraction of figure that the subaxes subtends in the y-direction (0 = top edge, 1 = bottom edge)
-        wspace and hspace: white space between subaxes in vertical and horizontal directions, respectively
-
-    returns:
-        subaxes handles
-    '''
-    import matplotlib.gridspec as gridspec
-
-    outer_grid = gridspec.GridSpec(100, 100)
-    inner_grid = gridspec.GridSpecFromSubplotSpec(dim[0], dim[1],
-                                                  subplot_spec=outer_grid[int(100 * yspan[0]):int(100 * yspan[1]),
-                                                               int(100 * xspan[0]):int(100 * xspan[1])],
-                                                  wspace=wspace, hspace=hspace)
-
-    # NOTE: A cleaner way to do this is with list comprehension:
-    # inner_ax = [[0 for ii in range(dim[1])] for ii in range(dim[0])]
-    inner_ax = dim[0] * [dim[1] * [
-        fig]]  # filling the list with figure objects prevents an error when it they are later replaced by axis handles
-    inner_ax = np.array(inner_ax)
-    idx = 0
-    for row in range(dim[0]):
-        for col in range(dim[1]):
-            if row > 0 and sharex == True:
-                share_x_with = inner_ax[0][col]
-            else:
-                share_x_with = None
-
-            if col > 0 and sharey == True:
-                share_y_with = inner_ax[row][0]
-            else:
-                share_y_with = None
-
-            inner_ax[row][col] = plt.Subplot(fig, inner_grid[idx], sharex=share_x_with, sharey=share_y_with)
-            fig.add_subplot(inner_ax[row, col])
-            idx += 1
-
-    inner_ax = np.array(inner_ax).squeeze().tolist()  # remove redundant dimension
-    return inner_ax
 
 
 #
@@ -755,11 +710,11 @@ def plot_task_performance(frame_times, pkl_df, ax=None, label=False, plot_d_prim
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 5))
     tmp = pkl_df.copy()
-    if 'level_0' in tmp:
-        tmp = tmp.drop('level_0', axis=1)
     tmp = tmp[tmp.trial_type != 'other']
     df_in = tmp[tmp.trial_type != 'aborted'].reset_index()
-    hr, cr, d_prime = ut.get_response_rates(df_in, sliding_window=100, reward_window=None)
+    if 'level_0' in df_in:
+        df_in = df_in.drop('level_0', axis=1)
+    hr, cr, d_prime = du.get_response_rates(df_in, sliding_window=100, reward_window=None)
     if plot_d_prime and plot_hr_fa:
         plot_d_prime(frame_times, d_prime, colors, ax)
         ax2 = ax.twinx()
@@ -805,7 +760,7 @@ def plot_trace_and_stuff(dataset, cell, second_axis=None, plot_stim=True, ax=Non
             ax2 = plot_task_performance(frame_times, pkl_df, ax=ax2)
         ax2.grid(False)
 
-    upper_limit, time_interval, frame_interval = sf.get_upper_limit_and_intervals(dataset)
+    upper_limit, time_interval, frame_interval = get_upper_limit_and_intervals(dataset)
     ax.set_xlim(time_interval[0], np.uint64(upper_limit / 30.))
     ax.set_xlabel('time (s)')
     plt.legend()

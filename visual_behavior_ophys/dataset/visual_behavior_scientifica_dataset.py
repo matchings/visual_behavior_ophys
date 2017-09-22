@@ -233,36 +233,53 @@ class VisualBehaviorScientificaDataset(object):
                                                 'trial_type', 'behavioral_response', 'behavioral_response_type'])
         return self.stim_table
 
+    def get_nan_trace_indices(self):
+        dff_path = os.path.join(self.ophys_experiment_dir, str(self.experiment_id) + '_dff.h5')
+        g = h5py.File(dff_path)
+        dff_traces = np.asarray(g['data'])
+        nan_trace_indices = []
+        for i, trace in enumerate(dff_traces):
+            if np.isnan(trace)[0]:
+                nan_trace_indices.append(i)
+                #     dataset.non_nan_inds = np.asarray([x for x in dataset.objectlist.index.values if x not in nan_trace_indices])
+        return nan_trace_indices
+
+    def get_edge_cell_indices(self):
+        seg_folder = [file for file in os.listdir(self.processed_dir) if 'segmentation' in file][0]
+        objectlist = pd.read_csv(os.path.join(self.processed_dir, seg_folder, 'objectlist.txt'))  # segmentation metrics
+        edge_cell_indices = objectlist[objectlist[' traceindex'] == 999].index.values
+        return edge_cell_indices
+
+    def get_filtered_roi_indices(self):
+        objectlist = self.objectlist
+        edge_cell_indices = self.get_edge_cell_indices()
+        nan_inds = self.get_nan_trace_indices()
+        remove_inds = np.unique(np.hstack((edge_cell_indices, nan_inds))) + 1
+        self.filtered_roi_indices = objectlist[(objectlist['index'].isin(remove_inds) == False)].index.values
+        return self.filtered_roi_indices
+
+    def filter_traces(self, traces):
+        filtered_roi_indices = self.get_filtered_roi_indices()
+        traces = traces[filtered_roi_indices]
+        return traces
+
+    def filter_roi_metrics(self):
+        filtered_roi_indices = self.get_filtered_roi_indices()
+        self.roi_metrics = self.objectlist[(self.objectlist['index'].isin(filtered_roi_indices) == True)]
+        return self.roi_metrics
+
     def get_roi_metrics(self):
         # objectlist.txt contains metrics associated with segmentation masks
         seg_folder = [file for file in os.listdir(self.processed_dir) if 'segmentation' in file][0]
         objectlist = pd.read_csv(os.path.join(self.processed_dir, seg_folder, 'objectlist.txt'))  # segmentation metrics
         self.objectlist = objectlist
-        if self.filter_edge_cells:
-            print 'filter edge cells =', self.filter_edge_cells
-            self.filter_edge_cells = True
-            self.filtered_roi_indices = objectlist[objectlist[' traceindex'] != 999].index.values
-            self.roi_metrics = objectlist[objectlist[' traceindex'] != 999]  # remove edge cells, etc
-        else:
-            self.roi_metrics = objectlist
+        self.roi_metrics = self.filter_roi_metrics()
         return self.roi_metrics
 
-    def filter_traces(self, traces):
-        if self.filter_edge_cells:
-            traces = traces[self.filtered_roi_indices]
-        else:
-            print "cant filter traces, no filtered_roi_indices present"
-        return traces
-
     def get_roi_mask_array(self):
-        if self.filter_edge_cells:
-            f = h5py.File(os.path.join(self.segmentation_dir, "maxInt_masks2.h5"))
-            masks = np.asarray(f['data'])
-            roi_dict = rm.make_roi_dict(self.roi_metrics, masks, index=' traceindex')
-        else:
-            f = h5py.File(os.path.join(self.segmentation_dir, "maxInt_masks.h5"))
-            masks = np.asarray(f['data'])
-            roi_dict = rm.make_roi_dict(self.roi_metrics, masks, index=' index')
+        f = h5py.File(os.path.join(self.segmentation_dir, "maxInt_masks2.h5"))
+        masks = np.asarray(f['data'])
+        roi_dict = rm.make_roi_dict(self.roi_metrics, masks, index=' traceindex')
         f.close()
         self.roi_dict = roi_dict
         tmp = roi_dict[roi_dict.keys()[0]]
@@ -290,8 +307,7 @@ class VisualBehaviorScientificaDataset(object):
         dff_path = os.path.join(self.ophys_experiment_dir, str(self.experiment_id) + '_dff.h5')
         g = h5py.File(dff_path)
         self.dff_traces = np.asarray(g['data'])
-        if self.filter_edge_cells:
-            self.dff_traces = self.filter_traces(self.dff_traces)
+        self.dff_traces = self.filter_traces(self.dff_traces)
         print 'length of traces:', self.dff_traces.shape[1]
         print 'number of segmented cells:', self.dff_traces.shape[0]
         timestamps = self.get_2p_timestamps()
@@ -309,8 +325,7 @@ class VisualBehaviorScientificaDataset(object):
         file_path = os.path.join(self.processed_dir, 'roi_traces.h5')
         g = h5py.File(file_path)
         self.raw_traces = np.asarray(g['data'])
-        if self.filter_edge_cells:
-            self.raw_traces = self.filter_traces(self.raw_traces)
+        self.raw_traces = self.filter_traces(self.raw_traces)
         return self.raw_traces
 
     def get_neuropil_traces(self):

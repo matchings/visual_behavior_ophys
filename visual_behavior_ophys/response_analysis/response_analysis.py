@@ -36,7 +36,9 @@ class ResponseAnalysis(object):
         self.previous_flash_start = float(self.response_window[0]) - (self.inter_flash_interval + self.stimulus_duration)
         self.previous_flash_window = [self.previous_flash_start, self.previous_flash_start + self.response_window_duration]
         self.get_response_dataframe()
-
+        columns = ['cell', 'change_code', 'behavioral_response_type']
+        self.mean_response_df = self.get_mean_response_df(columns)
+        self.cell_summary_df = self.get_cell_summary_df(p_val_thresh=0.005, sd_over_baseline_thresh=3)
 
     def get_nearest_frame(self, time_point, timestamps):
         return np.nanargmin(abs(timestamps - time_point))
@@ -75,50 +77,6 @@ class ResponseAnalysis(object):
                 responses[trial] = self.get_trace_around_timepoint(trial_time, trace, timestamps, trial_window)
             cell_response_dict[roi] = responses
         return cell_response_dict
-
-    # def generate_response_dataframe(self):
-    #     cell_response_dict = self.get_cell_response_dict()
-    #     stim_table = self.stim_table
-    #     columns = ["cell", "change_trial", "total_trial", "change_frame", "change_frame_time", "initial_code", "change_code",
-    #                "trial_type", "behavioral_response", "behavioral_response_type", "lick_times", "reward_rate"
-    #                "response", "response_timestamps", "mean_response", "p_val", "significance"
-    #                "run_speed", "run_timestamps", "mean_run_speed"]
-    #     frames_in_window = (self.trial_window[1] - self.trial_window[0]) * self.metadata['ophys_frame_rate']
-    #     frames_in_run_window = (self.trial_window[1] - self.trial_window[0]) * self.metadata['stimulus_frame_rate']
-    #     df_list = []
-    #     for cell in cell_response_dict.keys():
-    #         for trial in stim_table.change_trial:
-    #             response,timepoints = cell_response_dict[cell][trial]
-    #             df = [None for col in columns]
-    #             df[columns.index("cell")] = cell
-    #             df[columns.index("trial")] = stim_table.change_trial[trial]
-    #             df[columns.index("total_trial")] = stim_table.total_trial[trial]
-    #             df[columns.index("change_frame")] = stim_table.change_frame[trial]
-    #             df[columns.index("change_frame_time")] = stim_table.change_time[trial]
-    #             df[columns.index("initial_code")] = stim_table.initial_code[trial]
-    #             df[columns.index("change_code")] = stim_table.change_code[trial]
-    #             df[columns.index("initial_image")] = self.pkl_df[self.pkl_df.change_image != 0].initial_image
-    #             df[columns.index("change_image")] = self.pkl_df[self.pkl_df.change_image != 0].change_image
-    #             df[columns.index("trial_type")] = stim_table.trial_type[trial]
-    #             df[columns.index("behavioral_response")] = stim_table.behavioral_response[trial]
-    #             df[columns.index("behavioral_response_type")] = stim_table.behavioral_response_type[trial]
-    #             df[columns.index("lick_times")] = self.get_lick_times_from_frames(stim_table.total_trial[trial])
-    #             df[columns.index("reward_rate")] = self.get_reward_rate_for_trial(stim_table.total_trial[trial])
-    #             df[columns.index("response_timestamps")] = timepoints[:frames_in_window]
-    #             df[columns.index("response")] = response[:frames_in_window]
-    #             df[columns.index("mean_response")] = self.get_mean_in_window(response, self.mean_response_window,
-    #                                                     self.metadata['ophys_frame_rate'])
-    #             df[columns.index("p_val")] = self.get_pval(response[:frames_in_window])
-    #             df[columns.index("significance")] = True
-    #             run_speed_trace, run_speed_times = self.get_trace_around_timepoint(stim_table.change_time[trial],
-    #                                                 self.running_speed, self.stimulus_timestamps, self.trial_window)
-    #             df[columns.index("run_timestamps")] = run_speed_times[:frames_in_run_window]
-    #             df[columns.index("run_speed")] = run_speed_trace[:frames_in_run_window]
-    #             df[columns.index("mean_run_speed")] = self.get_mean_in_window(run_speed_trace,
-    #                                                     self.mean_response_window, self.metadata['stimulus_frame_rate'])
-    #             df_list.append(df)
-    #     self.response_df = pd.DataFrame(df_list, columns=columns)
-    #     return self.response_df
 
     def generate_response_dataframe(self):
         cell_response_dict = self.get_cell_response_dict()
@@ -168,7 +126,6 @@ class ResponseAnalysis(object):
         if len(response_df_file) > 0:
             print 'loading response dataframe'
             self.response_df = pd.read_hdf(os.path.join(self.save_dir, response_df_file[0]))
-            print 'done'
         else:
             print 'generating response dataframe'
             self.response_df = self.generate_response_dataframe()
@@ -176,7 +133,6 @@ class ResponseAnalysis(object):
             response_df_file_path = os.path.join(self.save_dir, 'response_dataframe.h5')
             self.response_df.to_hdf(response_df_file_path, key='df', format='fixed')
             # self.save_df_as_hdf(self.response_df,response_df_file_path)
-            print 'done'
             # if self.global_dff:
             #     methods = [None]
             #     df = self.add_mean_sd(df, methods, period='baseline', window=np.asarray(self.mean_response_window) - 1)
@@ -297,7 +253,8 @@ class ResponseAnalysis(object):
     def get_mean_response_df(self, columns):
         # create dataframe with trial averaged responses & stats for all unique values of a given set of response dtatframe columns
         # columns: names of response df columns. combinations of unique column values will be used as conditions to take the mean response
-        unique_values = self.get_unique_values_for_columns(self, columns)
+        print 'creating mean response dataframe'
+        unique_values = self.get_unique_values_for_columns(columns)
         tmp = []
         for i in range(len(unique_values)):
             values = unique_values[i]
@@ -306,166 +263,68 @@ class ResponseAnalysis(object):
                 stats, stats_columns = self.get_stats_for_filtered_response_df(filtered_response_df)
                 tmp.append(values + stats)
         column_names = columns + stats_columns
-        mean_response_df = pd.DataFrame(tmp, columns=column_names)
-        return mean_response_df
+        mdf = pd.DataFrame(tmp, columns=column_names)
+        return mdf
 
+    def get_cell_summary_df(self, p_val_thresh=0.005, sd_over_baseline_thresh=3):
+        print 'creating cell summary dataframe'
+        df = self.response_df
+        mdf = self.mean_response_df
+        columns = ["cell", "max_response", "pref_stim_code", "pref_image_name", "pref_behavioral_response",
+                   "p_value_pref_cond", "sd_over_baseline_pref_cond", "reliability_p_val", "reliability_sd",
+                   "responsive_conditions_p_val", "responsive_conditions_sd"]  # "run_p_val","run_modulation"
 
-    # def get_cell_summary_df_DoC(dataset, df, mdf, SI=True):
-    #     sdf = {}  # cell stats dataframe - summary statistics for each cell
-    #     if 'response_type' in mdf:
-    #         columns = ["cell", "max_response", "pref_stim", "pref_response_type", "p_value",
-    #                    "responsive_conds", "suppressed_conds", "sig_conds_thresh", "sig_conds_pval", "sig_conds_sd",
-    #                    "stim_SI", "change_SI", "hit_miss_SI", "hit_fa_SI"]  # "run_p_val","run_modulation"
-    #     else:
-    #         columns = ["cell", "max_response", "pref_stim", "pref_trial_type", "pref_response", "p_value",
-    #                    "reliability", "responsive_conds", "suppressed_conds",
-    #                    "sig_conds_thresh", "sig_conds_pval", "sig_conds_sd",
-    #                    "stim_SI", "change_SI", "hit_miss_SI", "hit_fa_SI"]  # "run_p_val","run_modulation"
-    #
-    #     df_list = []
-    #     for cell in df.cell.unique():
-    #         cdf = mdf[mdf.cell == cell]
-    #         # get pref_condition
-    #         max_response = np.amax(cdf.mean_response)
-    #         pref_cond = cdf[(cdf.mean_response == max_response)]
-    #         pref_stim = pref_cond.stim_code.values[0]
-    #         if 'response_type' in mdf:
-    #             pref_response_type = pref_cond.response_type.values[0]
-    #         else:
-    #             pref_trial_type = pref_cond.trial_type.values[0]
-    #             pref_response = pref_cond.response.values[0]
-    #         if 'p_val' not in df.keys():
-    #             df = rd.add_p_vals(df, dataset.mean_response_window)
-    #         p_value = np.nan
-    #         if 'response_type' not in mdf:
-    #             pref_cond_trials = df[
-    #                 (df.cell == cell) & (df.stim_code == pref_stim) & (df.trial_type == pref_trial_type) & (
-    #                     df.response == pref_response)]
-    #             reliability = len(np.where(pref_cond_trials.p_val < 0.05)[0]) / float(len(pref_cond_trials))
-    #         # number of conditions where mean response is greater than 20%
-    #         responsive_conditions = len(np.where((cdf.sig_thresh == True) & (cdf.suppressed == False))[0])
-    #         suppressed_conditions = len(np.where((cdf.sig_thresh == True) & (cdf.suppressed == True))[0])
-    #         # number of conditions where condition trials are significantly different than the blank trials
-    #         sig_conds_thresh = len(np.where(cdf.sig_thresh == True)[0])
-    #         sig_conds_pval = len(cdf[cdf.p_value < 0.05])
-    #         sig_conds_sd = len(np.where(cdf.sig_sd == True)[0])
-    #         #        #for pref_stim, compare running trials with stationary trials
-    #         #        run_speeds = df[(df.cell==cell)&(df.stim_code==pref_stim)].avg_run_speed.values
-    #         #        pref_means = df[(df.cell==cell)&(df.stim_code==pref_stim)].mean_response_dFF.values
-    #         #        run_inds = np.where(run_speeds>=1)[0]
-    #         #        stationary_inds = np.where(run_speeds<1)[0]
-    #         #        run_means = pref_means[run_inds]
-    #         #        stationary_means = pref_means[stationary_inds]
-    #         #        if (len(run_means>2)) & (len(stationary_means>2)):
-    #         #            f,run_p_val = stats.ks_2samp(run_means,stationary_means)
-    #         #            run_modulation = np.mean(run_means)/np.mean(stationary_means)
-    #         #        else:
-    #         #            run_p_val = np.NaN
-    #         #            run_modulation = np.NaN
-    #         if SI:
-    #             if 'response_type' not in mdf:
-    #                 stim_0 = cdf[(cdf.stim_code == 0) & (cdf.trial_type == 'go')].mean_response.mean()
-    #                 stim_1 = cdf[(cdf.stim_code == 1) & (cdf.trial_type == 'go')].mean_response.mean()
-    #                 stim_SI = (stim_0 - stim_1) / (stim_0 + stim_1)
-    #
-    #                 go = cdf[(cdf.stim_code == pref_stim) & (cdf.trial_type == 'go')].mean_response.mean()
-    #                 catch = cdf[(cdf.stim_code == pref_stim) & (cdf.trial_type == 'catch')].mean_response.mean()
-    #                 change_SI = (go - catch) / (go + catch)
-    #
-    #                 hit = \
-    #                     cdf[(cdf.stim_code == pref_stim) & (cdf.trial_type == 'go') & (
-    #                     cdf.response == 1)].mean_response.values[
-    #                         0]
-    #                 miss = \
-    #                     cdf[(cdf.stim_code == pref_stim) & (cdf.trial_type == 'go') & (
-    #                     cdf.response == 0)].mean_response.values[
-    #                         0]
-    #                 hit_miss_SI = (hit - miss) / (hit + miss)
-    #
-    #                 hit = \
-    #                     cdf[(cdf.stim_code == pref_stim) & (cdf.trial_type == 'go') & (
-    #                     cdf.response == 1)].mean_response.values[
-    #                         0]
-    #                 fa = cdf[(cdf.stim_code == pref_stim) & (cdf.trial_type == 'catch') & (
-    #                     cdf.response == 1)].mean_response.values[0]
-    #                 hit_fa_SI = (hit - fa) / (hit + fa)
-    #             else:
-    #                 if len(mdf.stim_code.unique()) > 2:
-    #                     stim_0 = cdf[(cdf.stim_code == pref_stim)].mean_response.mean()
-    #                     stim_1 = cdf[(cdf.stim_code != pref_stim)].mean_response.mean()
-    #                     stim_SI = (stim_0 - stim_1) / (stim_0 + stim_1)
-    #                 else:
-    #                     stim_0 = cdf[(cdf.stim_code == 0) & (cdf.response_type == 'CR')].mean_response.mean()
-    #                     stim_1 = cdf[(cdf.stim_code == 1) & (cdf.response_type == 'CR')].mean_response.mean()
-    #                     stim_SI = (stim_0 - stim_1) / (stim_0 + stim_1)
-    #
-    #                 go = cdf[
-    #                     (cdf.stim_code == pref_stim) & (cdf.response_type.isin(['MISS', 'HIT']))].mean_response.mean()
-    #                 catch = cdf[
-    #                     (cdf.stim_code == pref_stim) & (cdf.response_type.isin(['CR', 'FA']))].mean_response.mean()
-    #                 change_SI = (go - catch) / (go + catch)
-    #
-    #                 hit_df = cdf[(cdf.stim_code == pref_stim) & (cdf.response_type == 'HIT')]
-    #                 miss_df = cdf[(cdf.stim_code == pref_stim) & (cdf.response_type == 'MISS')]
-    #                 if (len(hit_df) > 0) and (len(miss_df) > 0):
-    #                     hit = hit_df.mean_response.values[0]
-    #                     miss = miss_df.mean_response.values[0]
-    #                     hit_miss_SI = (hit - miss) / (hit + miss)
-    #                 else:
-    #                     hit_miss_SI = np.nan
-    #
-    #                 fa_df = cdf[(cdf.stim_code == pref_stim) & (cdf.response_type == 'FA')]
-    #                 if (len(fa_df) > 0) and (len(hit_df) > 0):
-    #                     fa = fa_df.mean_response.values[0]
-    #                     hit = hit_df.mean_response.values[0]
-    #                     hit_fa_SI = (hit - fa) / (hit + fa)
-    #                 else:
-    #                     hit_fa_SI = np.nan
-    #         else:
-    #             stim_SI = np.nan
-    #             change_SI = np.nan
-    #             hit_miss_SI = np.nan
-    #             hit_fa_SI = np.nan
-    #
-    #         row = [None for col in columns]
-    #         row[columns.index("cell")] = cell
-    #         row[columns.index("max_response")] = max_response
-    #         row[columns.index("pref_stim")] = pref_stim
-    #         if 'response_type' in mdf:
-    #             row[columns.index("pref_response_type")] = pref_response_type
-    #         else:
-    #             row[columns.index("pref_trial_type")] = pref_trial_type
-    #             row[columns.index("pref_response")] = pref_response
-    #             row[columns.index("reliability")] = reliability
-    #         row[columns.index("p_value")] = p_value
-    #         row[columns.index("responsive_conds")] = responsive_conditions
-    #         row[columns.index("suppressed_conds")] = suppressed_conditions
-    #         row[columns.index("sig_conds_thresh")] = sig_conds_thresh
-    #         row[columns.index("sig_conds_pval")] = sig_conds_pval
-    #         row[columns.index("sig_conds_sd")] = sig_conds_sd
-    #         #        row[columns.index("run_p_val")] = run_p_val
-    #         #        row[columns.index("run_modulation")] = run_modulation
-    #         row[columns.index("stim_SI")] = stim_SI
-    #         row[columns.index("change_SI")] = change_SI
-    #         row[columns.index("hit_miss_SI")] = hit_miss_SI
-    #         row[columns.index("hit_fa_SI")] = hit_fa_SI
-    #         df_list.append(row)
-    #
-    #     sdf = pd.DataFrame(df_list, columns=columns)
-    #     return sdf
+        df_list = []
+        for cell in df.cell.unique():
+            cdf = mdf[mdf.cell == cell]
+            max_response = np.nanmax(cdf.response_window_mean.values)
+            pref_stim_code = cdf[(cdf.response_window_mean == max_response)].change_code.values[0]
+            pref_image_name = self.stim_codes[self.stim_codes.stim_code == pref_stim_code].image_name.values[0]
+            pref_behavioral_response = cdf[(cdf.response_window_mean == max_response)].behavioral_response_type.values[
+                0]
+            # get significance of mean response at preferred condition
+            p_value_pref_cond = cdf[(cdf.response_window_mean == max_response)].p_value.values[0]
+            sd_over_thresh_pref_cond = cdf[(cdf.response_window_mean == max_response)].sd_over_baseline.values[0]
+            # get fraction of trials for preferred condition for which the response was significant
+            pref_cond_trials = df[(df.cell == cell) & (df.change_code == pref_stim_code) & (
+            df.behavioral_response_type == pref_behavioral_response)]
+            reliability_p_val = len(np.where(pref_cond_trials.p_value < p_val_thresh)[0]) / float(len(pref_cond_trials))
+            reliability_sd = len(np.where(pref_cond_trials.sd_over_baseline > sd_over_baseline_thresh)[0]) / float(
+                len(pref_cond_trials))
+            # get number of conditions where mean response is signficant
+            responsive_conditions_p_val = len(np.where(cdf.p_value < p_val_thresh)[0])
+            responsive_conditions_sd = len(np.where(cdf.sd_over_baseline > sd_over_baseline_thresh)[0])
+            # make dataframe
+            row = [None for col in columns]
+            row[columns.index("cell")] = cell
+            row[columns.index("max_response")] = max_response
+            row[columns.index("pref_stim_code")] = pref_stim_code
+            row[columns.index("pref_image_name")] = pref_image_name
+            row[columns.index("pref_behavioral_response")] = pref_behavioral_response
+            row[columns.index("p_value_pref_cond")] = p_value_pref_cond
+            row[columns.index("sd_over_baseline_pref_cond")] = sd_over_thresh_pref_cond
+            row[columns.index("reliability_p_val")] = reliability_p_val
+            row[columns.index("reliability_sd")] = reliability_sd
+            row[columns.index("responsive_conditions_p_val")] = responsive_conditions_p_val
+            row[columns.index("responsive_conditions_sd")] = responsive_conditions_sd
+            #        row[columns.index("run_p_val")] = run_p_val
+            #        row[columns.index("run_modulation")] = run_modulation
+            df_list.append(row)
+        sdf = pd.DataFrame(df_list, columns=columns)
+        return sdf
 
     def add_pref_stim_to_df(df, sdf):
         pref_stim_list = []
         for row in range(len(df)):
-            pref_stim = sdf[sdf.cell == df.iloc[row].cell].pref_stim.values[0]
+            pref_stim = sdf[sdf.cell == df.iloc[row].cell].pref_stim_code.values[0]
             if df.iloc[row].change_code == pref_stim:
                 pref_stim_list.append(True)
             else:
                 pref_stim_list.append(False)
-        df['pref_stim'] = pref_stim_list
+        df['pref_stim_code'] = pref_stim_list
         return df
 
-    def get_summary_dfs(dataset,response_df):
+    def get_summary_dfs(dataset):
         mean_window = dataset.mean_response_window
         tmp = dataset.response_df.copy()
         tmp = tmp.replace(to_replace=np.nan, value=0)
@@ -478,7 +337,7 @@ class ResponseAnalysis(object):
         conditions = ['cell', 'stim_code', 'response_type']
         mdf = get_mean_df(tmp, conditions)
 
-        sdf = get_cell_summary_df_DoC(dataset, tmp, mdf)
+        sdf = get_cell_summary_df(dataset, tmp, mdf)
 
         mdf = add_stuff_to_mdf(dataset, mdf, sdf)
 
