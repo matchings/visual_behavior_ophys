@@ -88,6 +88,7 @@ def plot_behavior(pkl_df, save_dir=None, ax=None):
     if ax is None:
         figsize = (6, 12)
         fig, ax = plt.subplots(figsize=figsize)
+        fig.tight_layout()
     pdf = pkl_df[pkl_df.trial_type != 'aborted'].reset_index()
     make_lick_raster(pdf, ax, xmin=-1, xmax=4)
     #    ax.set_title('lick raster')
@@ -95,7 +96,6 @@ def plot_behavior(pkl_df, save_dir=None, ax=None):
     ax.set_ylabel('trials')
     plt.gca().invert_yaxis()
     if save_dir:
-        fig.tight_layout()
         save_figure(fig, figsize, save_dir, fig_title='behavior', folder='behavior', formats=['.png'])
     return ax
 
