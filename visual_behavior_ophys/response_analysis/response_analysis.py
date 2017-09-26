@@ -313,7 +313,7 @@ class ResponseAnalysis(object):
         sdf = pd.DataFrame(df_list, columns=columns)
         return sdf
 
-    def add_pref_stim_to_df(df, sdf):
+    def add_pref_stim_to_df(self, df, sdf):
         pref_stim_list = []
         for row in range(len(df)):
             pref_stim = sdf[sdf.cell == df.iloc[row].cell].pref_stim_code.values[0]
@@ -323,6 +323,17 @@ class ResponseAnalysis(object):
                 pref_stim_list.append(False)
         df['pref_stim_code'] = pref_stim_list
         return df
+
+    def add_stim_codes_to_pkl_df(self, pkl_df):
+        stim_codes = self.stim_codes
+        pkl_df['initial_code'] = [
+            stim_codes[stim_codes.image_name == pkl_df.iloc[trial].initial_image].stim_code.values[0]
+            for trial in range(len(pkl_df))]
+        pkl_df['change_code'] = [
+            stim_codes[stim_codes.image_name == pkl_df.iloc[trial].change_image].stim_code.values[0]
+            for trial in range(len(pkl_df))]
+        self.pkl_df = pkl_df
+        return pkl_df
 
     def get_summary_dfs(dataset):
         mean_window = dataset.mean_response_window

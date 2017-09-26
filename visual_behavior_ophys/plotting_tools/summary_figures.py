@@ -17,7 +17,7 @@ import seaborn as sns
 
 # formatting
 sns.set_style('darkgrid')
-sns.set_context('notebook', font_scale=2.5, rc={'lines.markeredgewidth': 2})
+sns.set_context('notebook', font_scale=2, rc={'lines.markeredgewidth': 2})
 
 
 def save_figure(fig, figsize, analysis_dir, folder, fig_title, formats=['.png']):
@@ -664,7 +664,26 @@ def get_colors_for_stim_codes(stim_codes):
     return colors
 
 
-def plot_reward_rate(frame_times, reward_rate, ax=None, label=False):
+def get_change_frame_times(dataset):
+    times = dataset.sync['visualFrames']['timestamps'][:len(dataset.running_speed)]
+    frame_times = []
+    for i, frame in enumerate(dataset.pkl_df.change_frame.values):
+        if frame != 0:
+            frame_times.append(times[frame])
+    return frame_times
+
+
+def get_reward_rate(dataset):
+    reward_rate = []
+    for i, frame in enumerate(dataset.pkl_df.change_frame.values):
+        if frame != 0:
+            reward_rate.append(dataset.pkl_df.iloc[i].reward_rate)
+    return reward_rate
+
+
+def plot_reward_rate(dataset, ax=None, label=False):
+    frame_times = get_change_frame_times(dataset)
+    reward_rate = get_reward_rate(dataset)
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 5))
     colors = sns.color_palette()
@@ -675,18 +694,22 @@ def plot_reward_rate(frame_times, reward_rate, ax=None, label=False):
     ax.plot(frame_times, reward_rate, color=colors[2], linewidth=4, label='disengaged', zorder=1)
     ax.plot(frame_times, engaged, color=colors[0], linewidth=4, label='engaged', zorder=2)
     if label:
-        plt.legend(loc='center right', bbox_to_anchor=(1.23, 0.8))
-        ax.set_title('reward rate')
+        plt.legend(bbox_to_anchor=(.3, 1.02, 1., .102), loc=3, ncol=2, borderaxespad=0.)
+        ax.set_ylabel('reward rate')
+        # plt.legend(loc='center right', bbox_to_anchor=(1.23, 0.8))
+        # ax.set_title('reward rate')
         ax.set_xlabel('time(s)')
     return ax
 
 
-def plot_run_speed(times, run_speed, ax=None, label=False):
+def plot_run_speed(dataset, ax=None, label=False):
+    times = dataset.timestamps_stimulus
+    run_speed = dataset.running_speed
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 5))
     ax.plot(times, run_speed, color='gray')
     if label:
-        ax.set_title('running speed (cm/s)')
+        ax.set_ylabel('run speed (cm/s)')
         ax.set_xlabel('time(s)')
     return ax
 
@@ -705,7 +728,9 @@ def plot_hit_false_alarm_rates(frame_times, hr, cr, ax):
     ax.legend(loc='upper right')
 
 
-def plot_task_performance(frame_times, pkl_df, ax=None, label=False, plot_d_prime=False, plot_hr_fa=True):
+def plot_task_performance(dataset, ax=None, label=False, plot_d_prime=False, plot_hr_fa=True):
+    frame_times = get_change_frame_times(dataset)
+    pkl_df = dataset.pkl_df
     colors = sns.color_palette()
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 5))
@@ -724,15 +749,15 @@ def plot_task_performance(frame_times, pkl_df, ax=None, label=False, plot_d_prim
         plot_d_prime(frame_times, d_prime, colors, ax)
     elif plot_hr_fa:
         plot_hit_false_alarm_rates(frame_times, hr, cr, ax)
-    ax.legend(loc='center right')
     if label:
-        plt.legend(loc='upper right')
-        ax.set_title('behavioral performance')
+        plt.legend(bbox_to_anchor=(.3, 1.02, 1., .102), loc=3, ncol=2, borderaxespad=0.)
+        # plt.legend(loc='upper right')
+        # ax.set_title('behavioral performance')
         ax.set_xlabel('time(s)')
     return ax
 
 
-def plot_trace_and_stuff(dataset, cell, second_axis=None, plot_stim=True, ax=None):
+def plot_trace_and_behavior(dataset, cell, second_axis=None, plot_stim=True, ax=None):
     # second_axis can be 'reward_rate' or 'task_performance'
 
     times = dataset.sync['visualFrames']['timestamps']
@@ -2327,7 +2352,7 @@ def plot_response_matrix(mdf, values, index, columns, cell_label='cell', remove_
                          sig=True, ax=None, analysis_dir=None, show=True, yticks=True):
     if sig:
         title = values + '_' + columns[0] + '_' + index[0] + '_sig'
-        sig_cells = mdf[mdf.sig_thresh == True][cell_label].unique()
+        sig_cells = mdf[mdf.p_value < 0.005][cell_label].unique()
         tmp = mdf[mdf[cell_label].isin(sig_cells)]
     else:
         title = values + '_' + columns[0] + '_' + index[0]
@@ -2494,7 +2519,7 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
     cax = ax.pcolormesh(traces, cmap='magma', vmin=0, vmax=np.percentile(traces[np.isnan(traces)==False], 99))
     # cax = ax.pcolormesh(traces, cmap=cmap, vmin=np.percentile(traces, 5), vmax=np.percentile(traces, 95))
     ax.set_ylim(0, traces.shape[0])
-    #    ax.set_xlim(0,traces.shape[1])
+    ax.set_xlim(0,traces.shape[1])
     ax.set_ylabel('cells')
     ax.set_xticks(np.arange(0, upper_limit, 600 * 30))
     ax.set_xticklabels(np.arange(0, upper_limit / 30, 600))
@@ -2505,7 +2530,7 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
     #    ax.set_xbound(lower=0,upper=upper_limit)
     if cbar:
         cb = plt.colorbar(cax);
-        cb.set_label('dF/F', labelpad=5)
+        cb.set_label('dF/F', labelpad=2)
         c = '1'
     else:
         ax.set_xticklabels('')
@@ -2678,6 +2703,61 @@ def plot_cell_zoom(dataset, cell, spacex=10, spacey=10, show_mask=False, save=Fa
         save_figure(fig, figsize, dataset.analysis_dir, 'roi_' + str(cell), folder, formats=['.png'])
         plt.close()
 
+def placeAxesOnGrid(fig, dim=[1, 1], xspan=[0, 1], yspan=[0, 1], wspace=None, hspace=None, sharex=False, sharey=False):
+    '''
+    Takes a figure with a gridspec defined and places an array of sub-axes on a portion of the gridspec
+
+    Takes as arguments:
+        fig: figure handle - required
+        dim: number of rows and columns in the subaxes - defaults to 1x1
+        xspan: fraction of figure that the subaxes subtends in the x-direction (0 = left edge, 1 = right edge)
+        yspan: fraction of figure that the subaxes subtends in the y-direction (0 = top edge, 1 = bottom edge)
+        wspace and hspace: white space between subaxes in vertical and horizontal directions, respectively
+
+    returns:
+        subaxes handles
+    '''
+    import matplotlib.gridspec as gridspec
+
+    outer_grid = gridspec.GridSpec(100, 100)
+    inner_grid = gridspec.GridSpecFromSubplotSpec(dim[0], dim[1],
+                                                  subplot_spec=outer_grid[int(100 * yspan[0]):int(100 * yspan[1]),
+                                                               int(100 * xspan[0]):int(100 * xspan[1])],
+                                                  wspace=wspace, hspace=hspace)
+
+    # NOTE: A cleaner way to do this is with list comprehension:
+    # inner_ax = [[0 for ii in range(dim[1])] for ii in range(dim[0])]
+    inner_ax = dim[0] * [dim[1] * [
+        fig]]  # filling the list with figure objects prevents an error when it they are later replaced by axis handles
+    inner_ax = np.array(inner_ax)
+    idx = 0
+    for row in range(dim[0]):
+        for col in range(dim[1]):
+            if row > 0 and sharex == True:
+                share_x_with = inner_ax[0][col]
+            else:
+                share_x_with = None
+
+            if col > 0 and sharey == True:
+                share_y_with = inner_ax[row][0]
+            else:
+                share_y_with = None
+
+            inner_ax[row][col] = plt.Subplot(fig, inner_grid[idx], sharex=share_x_with, sharey=share_y_with)
+            fig.add_subplot(inner_ax[row, col])
+            idx += 1
+
+    inner_ax = np.array(inner_ax).squeeze().tolist()  # remove redundant dimension
+    return inner_ax
+
+def add_stim_codes_to_pkl_df(pkl_df, stim_codes):
+    pkl_df['initial_code'] = [
+        stim_codes[stim_codes.image_name == pkl_df.iloc[trial].initial_image].stim_code.values[0]
+        for trial in range(len(pkl_df))]
+    pkl_df['change_code'] = [
+        stim_codes[stim_codes.image_name == pkl_df.iloc[trial].change_image].stim_code.values[0]
+        for trial in range(len(pkl_df))]
+    return pkl_df
 
 def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
     figsize = [2 * 11, 2 * 8.5]
@@ -2746,107 +2826,69 @@ def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
         plt.close()
 
 
-def plot_experiment_summary_figure(dataset, mdf, sdf, rdf, save=False):
+def plot_experiment_summary_figure(dataset, mdf, sdf, save=False):
     figsize = [2 * 11, 2 * 8.5]
     fig = plt.figure(figsize=figsize, facecolor='white')
     sns.axes_style({'axes.facecolor': 'white'})
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .22), yspan=(0, .22))
-    ax.imshow(dataset.max_image, cmap='gray', vmin=0, vmax=np.amax(dataset.max_image) / 2)
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .24), yspan=(0, .25))
+    ax.imshow(dataset.max_projection, cmap='gray', vmin=0, vmax=np.amax(dataset.max_projection) / 2)
     mask = rm.make_filtered_mask(dataset.roi_dict, dataset.roi_dict.keys())
     ax.imshow(mask, cmap='jet', alpha=0.3, vmin=0, vmax=0.7)
     ax.axis('off');
-    ax.set_title(dataset.expt_id)
+    ax.set_title(dataset.experiment_id)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .22), yspan=(.2, .8))
-    ax = plot_behavior(dataset.pkl_df, ax=ax)
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .24), yspan=(.2, .8))
+    plot_behavior(dataset.pkl_df, ax=ax)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.18, 0.94), yspan=(0, .3))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.2, 0.92), yspan=(0, .3))
     ax = plot_traces_heatmap(dataset, cbar=True, ax=ax)
+    ax.set_xlim(0, dataset.dff_traces.shape[1])
 
     ###behavior figures
-    times = dataset.sync['visualFrames']['timestamps'][:len(dataset.run_speed)]
-    frame_times = []
-    reward_rate = []
-    pkl_df = dataset.pkl_df
-    for i, frame in enumerate(dataset.pkl_df.change_frame.values):
-        if frame != 0:
-            frame_times.append(times[frame])
-            reward_rate.append(dataset.pkl_df.iloc[i].reward_rate)
     upper_limit, time_interval, frame_interval = get_upper_limit_and_intervals(dataset)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.18, .8), yspan=(.3, .44))
-    ax = plot_task_performance(frame_times, pkl_df, label=True, ax=ax)
-    ax.set_xlim(time_interval[0], np.uint64(upper_limit / 30.))
-    ax.set_xticks(np.arange(600, upper_limit / 30, 600))
-    ax.set_xlabel('')
-
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.18, .8), yspan=(.43, .58))
-    ax = plot_run_speed(times, frame_times, dataset.run_speed, ax=ax, label=True)
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.21, .8), yspan=(.29, .45))
+    ax = plot_run_speed(dataset, ax=ax, label=True)
     ax2 = ax.twinx()
-    ax2 = plot_reward_rate(frame_times, reward_rate, label=True, ax=ax2)
+    ax2 = plot_reward_rate(dataset, label=True, ax=ax2)
     ax2.set_title('')
-    ax.set_title('reward rate and run speed')
     ax.set_xlim(time_interval[0], np.uint64(upper_limit / 30.))
     ax.set_xticks(np.arange(600, upper_limit / 30, 600))
     ax2.grid(False)
-    ax.set_xlabel('')
     ax2.set_xlabel('')
+    ax.set_xlabel('')
 
-    ###mean trace
-    mean_trace = []
-    for roi in range(dataset.dff_traces.shape[0]):
-        trace = dataset.dff_traces[roi]
-        if (np.amax(trace) > 20) or (np.amax(trace) < -20):
-            print str(roi), ' bad trace'
-        else:
-            mean_trace.append(trace)
-    mean_trace = np.mean(np.asarray(mean_trace), axis=0)
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.18, .8), yspan=(.57, .71))
-    times_2p = dataset.sync['2PFrames']['timestamps'][:len(mean_trace)]
-    ax.plot(times_2p, mean_trace)
-    ax.set_xlim(0, upper_limit / 30)
-    # ax.set_xticks(np.arange(600*30,upper_limit,600*30))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.21, .8), yspan=(.44, .6))
+    ax = plot_task_performance(dataset, label=True, ax=ax)
+    ax.set_xlim(time_interval[0], np.uint64(upper_limit / 30.))
     ax.set_xticks(np.arange(600, upper_limit / 30, 600))
-    ax = add_stim_color_span(dataset, ax=ax)
-    ax.set_title('mean trace')
-    ax.set_xlabel('time(s)')
+    ax.set_xlabel('time (seconds)')
 
     ###response matrices.
-    if dataset.expt_id[:2] == '16':
-        dataset.stim_codes = dataset.stim_codes.rename(
-            columns={'image_name': 'image_num', 'full_image_name': 'image_name'})
-        dataset.stim_codes['full_image_name'] = dataset.stim_codes.image_name.values
     sc = dataset.stim_codes
-    tmp = pkl_df.copy()
+    tmp = dataset.pkl_df.copy()
     tmp = tmp[tmp.trial_type != 'aborted']
     tmp = tmp[tmp.trial_type != 'other']
-    if dataset.stimulus_type == 'grating':
-        #        tmp = pkl_df[pkl_df.trial_type!='aborted']
-        tmp = tmp.rename(columns={'initial_ori_str': 'initial_image', 'change_ori_str': 'change_image'})
+    tmp = add_stim_codes_to_pkl_df(tmp, dataset.stim_codes)
+    #     tmp = add_stim_codes_to_pkl_df(tmp,dataset.stim_codes)
 
-    tmp['initial_code'] = [sc[sc.image_name == tmp.iloc[trial].initial_image].stim_code.values[0] for trial in
-                           range(len(tmp))]
-    tmp['change_code'] = [sc[sc.image_name == tmp.iloc[trial].change_image].stim_code.values[0] for trial in
-                          range(len(tmp))]
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.5, .75), yspan=(.59, .8))
+    create_resp_prob_heatmap_general(tmp, index='initial_code', columns='change_code', ax=ax, cmap='magma',
+                                             filter_by_reward_rate=False)
 
-    # ax = pu.placeAxesOnGrid(fig,dim=(1,1),xspan=(.75,1.),yspan=(0.,.25))
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.5, .75), yspan=(.7, .99))
-    ax = create_resp_prob_heatmap_general(tmp, index='initial_code', columns='change_code', ax=ax, cmap='magma',
-                                          filter_by_reward_rate=False)
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.25, .5), yspan=(.59, .8))
+    create_resp_prob_heatmap_general(tmp, values='trial_num', index='initial_code', columns='change_code',
+                                             aggfunc=np.sum, ax=ax, cmap='magma', filter_by_reward_rate=False)
 
-    # ax = pu.placeAxesOnGrid(fig,dim=(1,1),xspan=(.75,1.),yspan=(.25,.5))
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.25, .5), yspan=(.7, .99))
-    ax = create_resp_prob_heatmap_general(tmp, values='trial_num', index='initial_code', columns='change_code',
-                                          aggfunc=np.sum, ax=ax, cmap='magma', filter_by_reward_rate=False)
-
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.77, 1.), yspan=(.55, .99))
-    ax = plot_response_matrix(mdf, values='mean_response', index=['cell'], columns=['stim_code'], sig=True, ax=ax)
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.77, 1.), yspan=(.3, .7))
+    plot_response_matrix(mdf, values='response_window_mean', index=['cell'], columns=['change_code'], sig=True,
+                                 ax=ax)
 
     fig.tight_layout()
 
-    save = True
     if save:
-        save_figure(fig, figsize, dataset.analysis_dir, dataset.expt_id + '_DoC', 'expt_summary', formats=['.png'])
+        save_figure(fig, figsize, dataset.analysis_dir, str(dataset.experiment_id) + '_DoC', 'expt_summary',
+                       formats=['.png'])
         analysis_dir = r'\\aibsdata2\nc-ophys\BehaviorImaging\DoC'
-        save_figure(fig, figsize, analysis_dir, dataset.expt_id + '_DoC', 'experiment_summaries')
+        save_figure(fig, figsize, analysis_dir, str(dataset.experiment_id) + '_DoC', 'experiment_summaries')
