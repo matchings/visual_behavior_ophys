@@ -4,6 +4,7 @@
     <list default="true" id="6340d208-fb54-4beb-a8d5-57f445d4b0db" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py" afterPath="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" afterPath="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,21 +18,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="visual_behavior_scientifica_dataset.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="visual_behavior_scientifica_dataset.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="884">
+            <state relative-caret-position="-646">
               <caret line="52" column="85" lean-forward="false" selection-start-line="52" selection-start-column="85" selection-end-line="52" selection-end-column="85" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
-                <marker date="1506405821551" expanded="true" signature="490:555" ph="..." />
-                <marker date="1506405821551" expanded="true" signature="499:555" ph="&quot;&quot;&quot;initialize visual behavior ophys experiment dataset...&quot;&quot;&quot;" />
-                <marker date="1506405821551" expanded="true" signature="14951:15043" ph="..." />
-                <marker date="1506405821551" expanded="true" signature="15079:15387" ph="..." />
-                <marker date="1506405821551" expanded="true" signature="15433:15790" ph="..." />
-                <marker date="1506405821551" expanded="true" signature="15835:16295" ph="..." />
-                <marker date="1506405821551" expanded="true" signature="16092:16244" ph="..." />
-                <marker date="1506405821551" expanded="true" signature="16333:16665" ph="..." />
               </folding>
             </state>
           </provider>
@@ -40,23 +33,20 @@
       <file leaf-file-name="response_analysis.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="13" column="23" lean-forward="false" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+            <state relative-caret-position="397">
+              <caret line="256" column="77" lean-forward="false" selection-start-line="256" selection-start-column="77" selection-end-line="256" selection-end-column="77" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
-                <marker date="1506405821578" expanded="true" signature="82:19944" ph="..." />
-                <marker date="1506405821578" expanded="true" signature="956:2098" ph="..." />
-                <marker date="1506405821578" expanded="true" signature="19844:19944" ph="..." />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="summary_figures.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="summary_figures.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="461">
-              <caret line="2843" column="9" lean-forward="false" selection-start-line="2843" selection-start-column="9" selection-end-line="2843" selection-end-column="114" />
+            <state relative-caret-position="-4418">
+              <caret line="165" column="65" lean-forward="true" selection-start-line="165" selection-start-column="65" selection-end-line="165" selection-end-column="65" />
               <folding>
                 <element signature="e#150#159#0" expanded="true" />
               </folding>
@@ -94,6 +84,9 @@
       <find>stim_table</find>
       <find>get_response_dataframe</find>
       <find>plot_transition_type_heatmap</find>
+      <find>plot_task</find>
+      <find>mean_response_da</find>
+      <find>heatmap_general</find>
     </findStrings>
     <replaceStrings>
       <replace>analysis_dir</replace>
@@ -105,19 +98,19 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/basic_plotting.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/dro/utilities.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py" />
+        <option value="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1912" />
-    <option name="y" value="-8" />
-    <option name="width" value="1296" />
-    <option name="height" value="1040" />
+    <option name="x" value="1" />
+    <option name="y" value="1" />
+    <option name="width" value="1677" />
+    <option name="height" value="1061" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -184,10 +177,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1452" height="876" extended-state="0" />
+    <frame x="1" y="1" width="1677" height="1061" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22214484" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19205298" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -222,13 +215,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py</url>
-          <line>96</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="2" />
     </breakpoint-manager>
     <watches-manager />
@@ -240,14 +226,6 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
-            <marker date="1506405821551" expanded="true" signature="490:555" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="499:555" ph="&quot;&quot;&quot;initialize visual behavior ophys experiment dataset...&quot;&quot;&quot;" />
-            <marker date="1506405821551" expanded="true" signature="14951:15043" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15079:15387" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15433:15790" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15835:16295" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16092:16244" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16333:16665" ph="..." />
           </folding>
         </state>
       </provider>
@@ -258,9 +236,6 @@
           <caret line="13" column="23" lean-forward="false" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <marker date="1506405821578" expanded="true" signature="82:19944" ph="..." />
-            <marker date="1506405821578" expanded="true" signature="956:2098" ph="..." />
-            <marker date="1506405821578" expanded="true" signature="19844:19944" ph="..." />
           </folding>
         </state>
       </provider>
@@ -291,14 +266,6 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
-            <marker date="1506405821551" expanded="true" signature="490:555" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="499:555" ph="&quot;&quot;&quot;initialize visual behavior ophys experiment dataset...&quot;&quot;&quot;" />
-            <marker date="1506405821551" expanded="true" signature="14951:15043" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15079:15387" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15433:15790" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15835:16295" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16092:16244" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16333:16665" ph="..." />
           </folding>
         </state>
       </provider>
@@ -340,9 +307,6 @@
           <caret line="13" column="23" lean-forward="false" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <marker date="1506405821578" expanded="true" signature="82:19944" ph="..." />
-            <marker date="1506405821578" expanded="true" signature="956:2098" ph="..." />
-            <marker date="1506405821578" expanded="true" signature="19844:19944" ph="..." />
           </folding>
         </state>
       </provider>
@@ -353,14 +317,6 @@
           <caret line="52" column="85" lean-forward="false" selection-start-line="52" selection-start-column="85" selection-end-line="52" selection-end-column="85" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
-            <marker date="1506405821551" expanded="true" signature="490:555" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="499:555" ph="&quot;&quot;&quot;initialize visual behavior ophys experiment dataset...&quot;&quot;&quot;" />
-            <marker date="1506405821551" expanded="true" signature="14951:15043" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15079:15387" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15433:15790" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15835:16295" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16092:16244" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16333:16665" ph="..." />
           </folding>
         </state>
       </provider>
@@ -381,32 +337,6 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
-            <marker date="1506405821551" expanded="true" signature="490:555" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="499:555" ph="&quot;&quot;&quot;initialize visual behavior ophys experiment dataset...&quot;&quot;&quot;" />
-            <marker date="1506405821551" expanded="true" signature="14951:15043" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15079:15387" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15433:15790" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15835:16295" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16092:16244" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16333:16665" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="884">
-          <caret line="52" column="85" lean-forward="false" selection-start-line="52" selection-start-column="85" selection-end-line="52" selection-end-column="85" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1506405821551" expanded="true" signature="490:555" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="499:555" ph="&quot;&quot;&quot;initialize visual behavior ophys experiment dataset...&quot;&quot;&quot;" />
-            <marker date="1506405821551" expanded="true" signature="14951:15043" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15079:15387" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15433:15790" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="15835:16295" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16092:16244" ph="..." />
-            <marker date="1506405821551" expanded="true" signature="16333:16665" ph="..." />
           </folding>
         </state>
       </provider>
@@ -437,23 +367,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="13" column="23" lean-forward="false" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+        <state relative-caret-position="397">
+          <caret line="256" column="77" lean-forward="false" selection-start-line="256" selection-start-column="77" selection-end-line="256" selection-end-column="77" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
-            <marker date="1506405821578" expanded="true" signature="82:19944" ph="..." />
-            <marker date="1506405821578" expanded="true" signature="956:2098" ph="..." />
-            <marker date="1506405821578" expanded="true" signature="19844:19944" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="461">
-          <caret line="2843" column="9" lean-forward="false" selection-start-line="2843" selection-start-column="9" selection-end-line="2843" selection-end-column="114" />
+        <state relative-caret-position="-4418">
+          <caret line="165" column="65" lean-forward="true" selection-start-line="165" selection-start-column="65" selection-end-line="165" selection-end-column="65" />
           <folding>
             <element signature="e#150#159#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-646">
+          <caret line="52" column="85" lean-forward="false" selection-start-line="52" selection-start-column="85" selection-end-line="52" selection-end-column="85" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
           </folding>
         </state>
       </provider>

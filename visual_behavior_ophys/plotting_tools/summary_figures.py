@@ -275,57 +275,32 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
         figsize = (5, 20)
         cols = 1
         rows = len(mdf.stim_code.unique())
-    elif len(mdf.stim_code.unique()) == 5:
-        figsize = (10, 10)
-        rows = len(mdf.stim_code.unique()) / 2 + 1
-        cols = 2
-        colors.append([1, 1, 1])
-        shape = pkl['image_dict'][0]['img061_VH.tiff'].shape
-        arr = np.zeros((shape))
-        arr[:] = 1
-        dataset.pkl['image_dict'][6] = {'  ': arr}
-    elif len(mdf.stim_code.unique()) == 8:
-        figsize = (15, 10)
-        rows = len(mdf.stim_code.unique()) / 2
-        cols = 2
 
     if ax is None:
         fig, ax = plt.subplots(rows, cols, figsize=figsize)
         ax = ax.ravel();
-    if len(str(dataset.pkl['image_dict'].keys()[0])) > 3:
+    if dataset.stimulus_name == 'natural_scene':
         for i, stim_code in enumerate(dataset.stim_codes.stim_code.values):
-            img_name = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].full_image_name.values[0]
-            img = pkl['image_dict'][img_name]
+            img_name = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_name.values[0]
+            for i, img_num in enumerate(pkl['image_dict'].keys()):
+                img_name2 = pkl['image_dict'][img_num].keys()[0]
+                if img_name2 == img_name:
+                    img = pkl['image_dict'][img_num][img_name]
+                    ax[i].imshow(img, cmap='gray', vmin=0, vmax=np.amax(img))
+                    ax[i].grid('off')
+                    ax[i].axis('off')
+                    ax[i].set_title(img_name, color=colors[i])
+                    ax[i].set_title(str(stim_code), color=colors[i])
+    elif dataset.stimulus_name == 'mnist':
+        for i, stim_code in enumerate(dataset.stim_codes.stim_code.values):
+            img_num = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_num.values[0]
+            img_name = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_name.values[0]
+            img = pkl['image_dict'][img_num][img_name]
             ax[i].imshow(img, cmap='gray', vmin=0, vmax=np.amax(img))
             ax[i].grid('off')
             ax[i].axis('off')
             ax[i].set_title(img_name, color=colors[i])
-            ax[i].set_title(str(stim_code), color=colors[i], fontweight='bold')
-    else:
-        #        for i,img_num in enumerate(pkl['image_dict'].keys()):
-        #            img_name = pkl['image_dict'][img_num].keys()[0]
-        if dataset.stimulus_name == 'natural_scene':
-            for i, stim_code in enumerate(dataset.stim_codes.stim_code.values):
-                img_name = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_name.values[0]
-                for i, img_num in enumerate(pkl['image_dict'].keys()):
-                    img_name2 = pkl['image_dict'][img_num].keys()[0]
-                    if img_name2 == img_name:
-                        img = pkl['image_dict'][img_num][img_name]
-                        ax[i].imshow(img, cmap='gray', vmin=0, vmax=np.amax(img))
-                        ax[i].grid('off')
-                        ax[i].axis('off')
-                        ax[i].set_title(img_name, color=colors[i])
-                        ax[i].set_title(str(stim_code), color=colors[i])
-        elif dataset.stimulus_name == 'mnist':
-            for i, stim_code in enumerate(dataset.stim_codes.stim_code.values):
-                img_num = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_num.values[0]
-                img_name = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_name.values[0]
-                img = pkl['image_dict'][img_num][img_name]
-                ax[i].imshow(img, cmap='gray', vmin=0, vmax=np.amax(img))
-                ax[i].grid('off')
-                ax[i].axis('off')
-                ax[i].set_title(img_name, color=colors[i])
-                ax[i].set_title(str(stim_code), color=colors[i])
+            ax[i].set_title(str(stim_code), color=colors[i])
     if save:
         save_figure(fig, figsize, dataset.analysis_dir, fig_title='images', folder='behavior', formats=['.png'])
         plt.close()
@@ -703,7 +678,7 @@ def plot_reward_rate(dataset, ax=None, label=False):
 
 
 def plot_run_speed(dataset, ax=None, label=False):
-    times = dataset.timestamps_stimulus
+    times = dataset.timestamps_stimulus[:len(dataset.running_speed)]
     run_speed = dataset.running_speed
     if ax is None:
         fig, ax = plt.subplots(figsize=(15, 5))

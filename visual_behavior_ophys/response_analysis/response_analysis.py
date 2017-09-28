@@ -38,7 +38,7 @@ class ResponseAnalysis(object):
         self.get_response_dataframe()
         columns = ['cell', 'change_code', 'behavioral_response_type']
         self.mean_response_df = self.get_mean_response_df(columns)
-        self.cell_summary_df = self.get_cell_summary_df(p_val_thresh=0.005, sd_over_baseline_thresh=3)
+        # self.cell_summary_df = self.get_cell_summary_df(p_val_thresh=0.005, sd_over_baseline_thresh=3)
 
     def get_nearest_frame(self, time_point, timestamps):
         return np.nanargmin(abs(timestamps - time_point))
@@ -253,6 +253,8 @@ class ResponseAnalysis(object):
     def get_mean_response_df(self, columns):
         # create dataframe with trial averaged responses & stats for all unique values of a given set of response dtatframe columns
         # columns: names of response df columns. combinations of unique column values will be used as conditions to take the mean response
+        # ex: ['cell', 'change_code', 'behavioral_response_type'] gives a dataframe with mean response data for every cell, averaged across
+        # each unique combination of change_code and behavioral_response_type
         print 'creating mean response dataframe'
         unique_values = self.get_unique_values_for_columns(columns)
         tmp = []
