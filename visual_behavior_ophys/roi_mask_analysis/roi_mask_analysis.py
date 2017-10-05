@@ -55,13 +55,29 @@ def plot_masks(masks):
 
 # make dictionary of individual roi masks for all cells across pages of the original mask
 # goes through every index in objectlist and uses centroid position and page within original mask to find the corresponding individual roi mask for that index
-def make_roi_dict(df,masks,index=' traceindex'):
+# def make_roi_dict(df,masks,index=' traceindex'):
+#     roi_dict={}
+#     for roi in df.index.values:
+#         roi_mask = np.zeros(masks[0,:,:].shape)
+#         cx = df[df[index]==roi][' cx'].values[0]
+#         cy = df[df[index]==roi][' cy'].values[0]
+#         p = df[df[index]==roi][' mask2Frame'].values[0]
+#         page = masks[p]
+#         labels, n_rois = measurements.label(page)
+#         roi_id = labels[cy,cx]
+#         inds = np.where(labels==roi_id)
+#         roi_mask[inds]=1
+#         roi_dict[roi] = roi_mask
+#     return roi_dict
+
+
+def make_roi_dict(df,masks):
     roi_dict={}
-    for roi in df[index].values:
+    for roi in df.index.values:
         roi_mask = np.zeros(masks[0,:,:].shape)
-        cx = df[df[index]==roi][' cx'].values[0]
-        cy = df[df[index]==roi][' cy'].values[0]
-        p = df[df[index]==roi][' mask2Frame'].values[0]
+        cx = df[df.index==roi][' cx'].values[0]
+        cy = df[df.index==roi][' cy'].values[0]
+        p = df[df.index==roi][' mask2Frame'].values[0]
         page = masks[p]
         labels, n_rois = measurements.label(page)
         roi_id = labels[cy,cx]

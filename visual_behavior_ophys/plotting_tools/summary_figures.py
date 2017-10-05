@@ -203,22 +203,21 @@ def create_resp_prob_heatmap_general(df, values='response', index='initial_image
 #
 # # In[ ]:
 #
-def plot_mean_resp_heatmap_cell(df, cell, values='mean_response', index='initial_code', columns='change_code',
+def plot_mean_resp_heatmap_cell(df, cell, values='response_window_mean', index='initial_code', columns='change_code',
                                 analysis_dir=None, ax=None):
     resp_df = df[df.cell == cell]
-    resp_df = resp_df[['cell', index, columns, values, 'responses']]
-    #    resp_df = resp_df[['cell','initial_code','change_code','responses','mean_response']]
+    resp_df = resp_df[['cell', index, columns, values, 'response']]
     if ax is None:
         figsize = (6, 6)
         fig, ax = plt.subplots(figsize=figsize)
     # df = df[df.trial_type!='aborted']
     response_matrix = pd.pivot_table(resp_df,
-                                     values='mean_response',
+                                     values='response_window_mean',
                                      index=[index],
                                      columns=[columns])
 
-    sns.heatmap(response_matrix, cmap='magma', linewidths=0, linecolor='white', square=True, annot=True,
-                annot_kws={"fontsize": 14}, vmin=0, vmax=np.amax(np.amax(response_matrix)),
+    sns.heatmap(response_matrix, cmap='magma', linewidths=0, linecolor='white', square=True, annot=False,
+                annot_kws={"fontsize": 10}, vmin=0, vmax=np.amax(np.amax(response_matrix)),
                 robust=True, cbar_kws={"drawedges": False, "shrink": 0.7}, ax=ax)
 
     ax.set_title('roi ' + str(cell) + ' - ' + values, fontsize=16, va='bottom', ha='center')
@@ -264,25 +263,25 @@ def plot_mean_resp_heatmap_cell(df, cell, values='mean_response', index='initial
 #
 # # In[154]:
 
-def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
+def plot_images(dataset, mdf, ax=None, save=False, orientation='row',color_box=True):
     pkl = dataset.pkl
     colors = get_colors_for_stim_codes(dataset.stim_codes.stim_code.unique())
     if orientation == 'row':
         figsize = (20, 5)
-        cols = len(mdf.stim_code.unique())
+        cols = len(mdf.change_code.unique())
         rows = 1
     elif orientation == 'column':
         figsize = (5, 20)
         cols = 1
-        rows = len(mdf.stim_code.unique())
+        rows = len(mdf.change_code.unique())
 
     if ax is None:
         fig, ax = plt.subplots(rows, cols, figsize=figsize)
         ax = ax.ravel();
-    if dataset.stimulus_name == 'natural_scene':
-        for i, stim_code in enumerate(dataset.stim_codes.stim_code.values):
+    if dataset.stimulus_type == 'images':
+        for i, stim_code in enumerate(np.sort(dataset.stim_codes.stim_code.values)):
             img_name = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_name.values[0]
-            for i, img_num in enumerate(pkl['image_dict'].keys()):
+            for img_num in pkl['image_dict'].keys():
                 img_name2 = pkl['image_dict'][img_num].keys()[0]
                 if img_name2 == img_name:
                     img = pkl['image_dict'][img_num][img_name]
@@ -290,7 +289,13 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
                     ax[i].grid('off')
                     ax[i].axis('off')
                     ax[i].set_title(img_name, color=colors[i])
-                    ax[i].set_title(str(stim_code), color=colors[i])
+                    ax[i].set_title(str(stim_code), color='k')
+                    if color_box:
+                        linewidth = 6
+                        ax[i].axhline(y=-20, xmin=0.04, xmax=0.95, linewidth=linewidth, color=colors[i]);
+                        ax[i].axhline(y=img.shape[0] - 20, xmin=0.04, xmax=0.95, linewidth=linewidth, color=colors[i]);
+                        ax[i].axvline(x=-30, ymin=0.05, ymax=0.95, linewidth=linewidth, color=colors[i]);
+                        ax[i].axvline(x=img.shape[1], ymin=0, ymax=0.95, linewidth=linewidth, color=colors[i]);
     elif dataset.stimulus_name == 'mnist':
         for i, stim_code in enumerate(dataset.stim_codes.stim_code.values):
             img_num = dataset.stim_codes[dataset.stim_codes.stim_code == stim_code].image_num.values[0]
@@ -303,7 +308,7 @@ def plot_images(dataset, mdf, ax=None, save=False, orientation=None):
             ax[i].set_title(str(stim_code), color=colors[i])
     if save:
         save_figure(fig, figsize, dataset.analysis_dir, fig_title='images', folder='behavior', formats=['.png'])
-        plt.close()
+
     return ax
 
     # In[154]:
@@ -389,34 +394,37 @@ def plot_vsyncintervals(pkl, analysis_dir):
 #
 # # In[141]:
 
-def plot_engaged_disengaged(dataset, cell, sdf, code='change_code', save=False, ax=None):
+def plot_engaged_disengaged(ra, cell, code='change_code', save=False, ax=None):
     # code can be 'change_code' or 'initial_code'
+    sdf = ra.cell_summary_df
     interval_sec = 1
     colors = sns.color_palette()
-    pref_stim = sdf[sdf.cell == cell].pref_stim.values[0]
-    img_num = dataset.stim_codes[dataset.stim_codes.stim_code == pref_stim].image_name.values[0]
+    pref_stim = sdf[sdf.cell == cell].pref_stim_code.values[0]
+    img_num = ra.stim_codes[ra.stim_codes.stim_code == pref_stim].image_name.values[0]
     if ax is None:
         figsize = (6, 5)
         fig, ax = plt.subplots(figsize=figsize)
-    pkl_df = dataset.pkl_df
-    df = dataset.df
+    pkl_df = ra.pkl_df
+    df = ra.response_df
     engaged_trials = pkl_df[(pkl_df.reward_rate >= 2) & (pkl_df.trial_type != 'aborted')].index.values
     traces = df[(df.cell == cell) & (df[code] == pref_stim) & (df.trial_type == 'go') & (
-        df.global_trial.isin(engaged_trials))].responses.values
-    trace = traces.mean()
-    times = np.arange(0, len(trace), 1)
-    sem = (traces.std()) / np.sqrt(float(len(traces)))
-    ax.plot(trace, label='engaged', linewidth=3, color=colors[0])
-    ax.fill_between(times, trace + sem, trace - sem, alpha=0.5, color=colors[0])
+        df.total_trial.isin(engaged_trials))].response.values
+    if len(traces) >0:
+        trace = traces.mean()
+        times = np.arange(0, len(trace), 1)
+        sem = (traces.std()) / np.sqrt(float(len(traces)))
+        ax.plot(trace, label='engaged', linewidth=3, color=colors[0])
+        ax.fill_between(times, trace + sem, trace - sem, alpha=0.5, color=colors[0])
 
     disengaged_trials = pkl_df[(pkl_df.reward_rate < 2) & (pkl_df.trial_type != 'aborted')].index.values
     traces = df[(df.cell == cell) & (df[code] == pref_stim) & (df.trial_type == 'go') & (
-        df.global_trial.isin(disengaged_trials))].responses.values
-    trace = traces.mean()
-    times = np.arange(0, len(trace), 1)
-    sem = (traces.std()) / np.sqrt(float(len(traces)))
-    ax.plot(trace, label='disengaged', linewidth=3, color=colors[2])
-    ax.fill_between(times, trace + sem, trace - sem, alpha=0.5, color=colors[2])
+        df.total_trial.isin(disengaged_trials))].response.values
+    if len(traces) > 0:
+        trace = traces.mean()
+        times = np.arange(0, len(trace), 1)
+        sem = (traces.std()) / np.sqrt(float(len(traces)))
+        ax.plot(trace, label='disengaged', linewidth=3, color=colors[2])
+        ax.fill_between(times, trace + sem, trace - sem, alpha=0.5, color=colors[2])
 
     xticks, xticklabels = get_xticks_xticklabels(trace, interval_sec)
     ax.set_xticks(xticks);
@@ -429,25 +437,28 @@ def plot_engaged_disengaged(dataset, cell, sdf, code='change_code', save=False, 
         plt.legend(loc='upper right', bbox_to_anchor=(1.5, 1.0))
         ax.set_title('cell ' + str(cell) + ' - ' + str(img_num))
         fig.tight_layout()
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='cell_' + str(cell), folder='task_engagement')
+        save_figure(fig, figsize, ra.analysis_dir, fig_title='cell_' + str(cell), folder='task_engagement')
         plt.close()
     else:
         plt.legend(loc='upper right', bbox_to_anchor=(0.85, 1.35))
 
 
-def plot_running_not_running(dataset, cell, sdf, code='change_code', save=False, ax=None):
+
+def plot_running_not_running(ra, cell, code='change_code', save=False, ax=None):
+    df = ra.response_df
+    mdf = ra.mean_response_df
+    sdf = ra.cell_summary_df
     # code can be 'change_code' or 'initial_code'
     interval_sec = 1
     colors = sns.color_palette()
-    pref_stim = sdf[sdf.cell == cell].pref_stim.values[0]
-    img_num = dataset.stim_codes[dataset.stim_codes.stim_code == pref_stim].image_name.values[0]
+    pref_stim = sdf[sdf.cell == cell].pref_stim_code.values[0]
+    img_num = ra.stim_codes[ra.stim_codes.stim_code == pref_stim].image_name.values[0]
     if ax is None:
         figsize = (6, 5)
         fig, ax = plt.subplots(figsize=figsize)
-    df = dataset.df
-    running_trials = df[df.avg_run_speed > 3].global_trial.values
+    running_trials = df[df.mean_run_speed > 3].total_trial.values
     traces = df[(df.cell == cell) & (df[code] == pref_stim) & (df.trial_type == 'go') & (
-        df.global_trial.isin(running_trials))].responses.values
+        df.total_trial.isin(running_trials))].response.values
     if len(traces) > 3:
         trace = traces.mean()
         times = np.arange(0, len(trace), 1)
@@ -455,9 +466,9 @@ def plot_running_not_running(dataset, cell, sdf, code='change_code', save=False,
         ax.plot(trace, label='running', linewidth=3, color=colors[0])
         ax.fill_between(times, trace + sem, trace - sem, alpha=0.5, color=colors[0])
 
-    non_running_trials = df[df.avg_run_speed < 3].global_trial.values
+    non_running_trials = df[df.mean_run_speed < 3].total_trial.values
     traces = df[(df.cell == cell) & (df[code] == pref_stim) & (df.trial_type == 'go') & (
-        df.global_trial.isin(non_running_trials))].responses.values
+        df.total_trial.isin(non_running_trials))].response.values
     if len(traces) > 3:
         trace = traces.mean()
         times = np.arange(0, len(trace), 1)
@@ -476,10 +487,11 @@ def plot_running_not_running(dataset, cell, sdf, code='change_code', save=False,
         plt.legend(loc='upper right', bbox_to_anchor=(1.5, 1.0))
         ax.set_title('cell ' + str(cell) + ' - ' + str(img_num))
         fig.tight_layout()
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title='cell_' + str(cell), folder='task_engagement')
+        save_figure(fig, figsize, ra.analysis_dir, fig_title='cell_' + str(cell), folder='task_engagement')
         plt.close()
     else:
         plt.legend(loc='upper right', bbox_to_anchor=(0.85, 1.35))
+
 
 
 #
@@ -732,7 +744,7 @@ def plot_task_performance(dataset, ax=None, label=False, plot_d_prime=False, plo
     return ax
 
 
-def plot_trace_and_behavior(dataset, cell, second_axis=None, plot_stim=True, ax=None):
+def plot_trace_and_behavior(dataset, cell, second_axis=None, ax=None):
     # second_axis can be 'reward_rate' or 'task_performance'
 
     times = dataset.sync['visualFrames']['timestamps']
@@ -754,7 +766,7 @@ def plot_trace_and_behavior(dataset, cell, second_axis=None, plot_stim=True, ax=
     if second_axis:
         ax2 = ax.twinx()
         if second_axis == 'reward_rate':
-            ax2 = sf.plot_reward_rate(frame_times, reward_rate, ax=ax2)
+            ax2 = plot_reward_rate(dataset, ax=ax2)
             ax2.set_ylabel('reward rate')
         elif second_axis == 'task_performance':
             ax2 = plot_task_performance(frame_times, pkl_df, ax=ax2)
@@ -891,6 +903,7 @@ def plot_transition_type_heatmap(ra, cell_list, cmap='jet', vmax=None, save=Fals
     figsize = (15, 10)
     rows = 2
     cols = len(df.change_code.unique()) / 2
+    colors = get_colors_for_response_types(response_types)
     for cell in cell_list:
         if ax is None:
             fig, ax = plt.subplots(rows, cols, figsize=figsize, sharex=True);
@@ -904,8 +917,9 @@ def plot_transition_type_heatmap(ra, cell_list, cmap='jet', vmax=None, save=Fals
             response_type_list = []
             segments = []
             idx = 0
+            segments.append(idx)
             for y, response_type in enumerate(response_types):
-                segments.append(idx)
+
                 sub_df = im_df[(im_df.behavioral_response_type == response_type)]
                 responses = sub_df.response.values
                 for pos, trial in enumerate(range(responses.shape[0])[::-1]):
@@ -921,11 +935,16 @@ def plot_transition_type_heatmap(ra, cell_list, cmap='jet', vmax=None, save=Fals
                 ax[i].set_ylim(0, response_matrix.shape[0]);
                 ax[i].set_xlim(0, response_matrix.shape[1]);
                 ax[i].set_yticks(segments);
+                ax[i].set_yticklabels('')
+                #             ax[i].set_yticks('');
                 ax[i].set_xlabel('time (s)');
                 ax[i].set_xticks(np.arange(0, (ra.trial_window[1] * 30 - (ra.trial_window[0] * 30) + 30), 30));
                 ax[i].set_xticklabels(np.arange(ra.trial_window[0], ra.trial_window[1] + 1, 1));
                 change_im = ra.stim_codes[ra.stim_codes.stim_code == change_code].image_name.values[0].split('_')[0]
                 ax[i].set_title(str(change_code));
+            for s in range(len(segments) - 1):
+                ax[i].vlines(x=-10, ymin=segments[s], ymax=segments[s + 1], color=colors[s], linewidth=25)
+            ax[0].set_ylabel('trials')
             resp_types.append(response_type_list)
             if colorbar:
                 plt.colorbar(cax, ax=ax[i]);
@@ -1526,7 +1545,7 @@ def plot_transition_type_heatmap_sig_cells(dataset, sig_cell_list, change_code, 
 #
 # # In[ ]:
 
-def plot_trial_types_selectivity_ns(dataset, mdf, cell_list, window=2, save=False, ax=None):
+def plot_trial_types_selectivity_ns(ra, cell_list, window=2, save=False, ax=None):
     response_types = ['HIT', 'MISS', 'FA', 'CR']
     #    frame_int = 0.7*30 #flashes happen every 700ms
     #    stim_start_frame = (dataset.mean_window[0]*30) #change time
@@ -1534,14 +1553,14 @@ def plot_trial_types_selectivity_ns(dataset, mdf, cell_list, window=2, save=Fals
     #    num_flashes = 6
     #    last_flash = stim_start_frame+(frame_int*num_flashes)
     #    flash_onsets = np.arange(stim_start_frame,last_flash,frame_int)
-
-    frames_range = [(-window + dataset.window[1]) * 30, (window + dataset.window[1]) * 30]
+    mdf = ra.mean_response_df
+    frames_range = [(-window + ra.response_window[1]) * 30, (window + ra.response_window[1]) * 30]
     # frames = [frames_range[0]-frames_range[0],frames_range[1]-frames_range[0]]
     xlabels = np.arange((-window), (window) + 1, 1)
     xtimes = np.arange(0, (window * 2 * 30) + 5, 30)
-    stim_codes = np.sort(mdf.stim_code.unique())
+    stim_codes = np.sort(mdf.change_code.unique())
     stim_colors = get_colors_for_stim_codes(stim_codes)
-    stim_df = dataset.stim_codes
+    stim_df = ra.stim_codes
     for cell in cell_list:
         cdf = mdf[(mdf.cell == cell)]
         if ax is None:
@@ -1550,7 +1569,7 @@ def plot_trial_types_selectivity_ns(dataset, mdf, cell_list, window=2, save=Fals
             ax = ax.ravel();
         for i, response_type in enumerate(response_types):
             for y, stim_code in enumerate(stim_codes):
-                tdf = cdf[(cdf.stim_code == stim_code) & (cdf.response_type == response_type)]
+                tdf = cdf[(cdf.change_code == stim_code) & (cdf.behavioral_response_type == response_type)]
                 if len(tdf) > 0:
                     trace = tdf.mean_trace.values[0][frames_range[0]:frames_range[1]]
                     sem = tdf.sem_trace.values[0][frames_range[0]:frames_range[1]]
@@ -1574,33 +1593,28 @@ def plot_trial_types_selectivity_ns(dataset, mdf, cell_list, window=2, save=Fals
             plt.suptitle('cell ' + str(cell), x=0.47, y=1, horizontalalignment='center')
             fig.tight_layout()
             plt.gcf().subplots_adjust(right=0.85)
-            save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell),
+            save_figure(fig, figsize, ra.analysis_dir, fig_title='roi_' + str(cell),
                         folder='trial_types_selectivity_' + str(window))
             plt.close()
             ax = None
     return ax
 
-
 #
 #
 # # In[ ]:
 
-def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, response_types=['HIT', 'MISS'],
+def plot_trial_types_selectivity_pref_image(ra, cell_list, response_types=['HIT', 'MISS'],
                                             window=[-1, 2], save=False, ax=None):
-    #    response_types = ['HIT','MISS','FA','CR']
-    #    response_types = ['HIT','MISS']
-    #    colors = get_colors_for_response_types(response_types)
+    mdf = ra.mean_response_df
+    sdf = ra.cell_summary_df
     colors = get_colors_for_response_types(['CR', 'FA'])
-    frames_range = [(window[0] + dataset.window[1]) * 30, (window[1] + dataset.window[1]) * 30]
-    # frames = [frames_range[0]-frames_range[0],frames_range[1]-frames_range[0]]
+    frames_range = [(window[0] + ra.response_window[1]) * 30, (window[1] + ra.response_window[1]) * 30]
     xlabels = np.arange((window[0]), (window[1]) + 1, 1)
     xtimes = np.arange(0, ((-window[0] + window[1]) * 30) + 5, 30)
-    #    stim_codes = np.sort(mdf.stim_code.unique())
-    #    stim_colors = get_colors_for_stim_codes(stim_codes)
-    stim_df = dataset.stim_codes
+    stim_df = ra.stim_codes
     for cell in cell_list:
         cdf = mdf[(mdf.cell == cell)]
-        pref_stim = sdf[sdf.cell == cell].pref_stim.values[0]
+        pref_stim = sdf[sdf.cell == cell].pref_stim_code.values[0]
         pref_image = stim_df[stim_df.stim_code == pref_stim].image_name.values[0]
         if ax is None:
             figsize = (5, 4)
@@ -1609,7 +1623,7 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
         else:
             labels = False
         for i, response_type in enumerate(response_types):
-            tdf = cdf[(cdf.stim_code == pref_stim) & (cdf.response_type == response_type)]
+            tdf = cdf[(cdf.change_code == pref_stim) & (cdf.behavioral_response_type == response_type)]
             if len(tdf) > 0:
                 trace = tdf.mean_trace.values[0][frames_range[0]:frames_range[1]]
                 sem = tdf.sem_trace.values[0][frames_range[0]:frames_range[1]]
@@ -1623,12 +1637,11 @@ def plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, cell_list, respon
                     ax.set_xlabel('time after change (sec)')
                     ax.set_ylabel('dF/F')
                     #        plt.legend(bbox_to_anchor=(1.5, 1.05))
-
         if save:
             ax.set_title('cell ' + str(cell))
             fig.tight_layout()
             plt.gcf().subplots_adjust(right=0.75)
-            save_figure(fig, figsize, dataset.analysis_dir, fig_title='roi_' + str(cell) + '_ttspi',
+            save_figure(fig, figsize, ra.analysis_dir, fig_title='roi_' + str(cell),
                         folder='trial_types_selectivity_pref_image')
             plt.close()
         else:
@@ -2504,8 +2517,8 @@ def plot_traces_heatmap(dataset, save=False, cbar=True, ax=None):
     #    ax.set_xticklabels(time_interval)
     #    ax.set_xbound(lower=0,upper=upper_limit)
     if cbar:
-        cb = plt.colorbar(cax);
-        cb.set_label('dF/F', labelpad=2)
+        cb = plt.colorbar(cax, pad = 0.015);
+        cb.set_label('dF/F', labelpad=3)
         c = '1'
     else:
         ax.set_xticklabels('')
@@ -2662,7 +2675,7 @@ def plot_cell_zoom(dataset, cell, spacex=10, spacey=10, show_mask=False, save=Fa
     ymax = np.max(y)
     inds = np.where(mask == 0)
     mask[inds] = np.nan
-    ax.imshow(dataset.max_image, cmap='gray', vmin=0, vmax=np.amax(dataset.max_image) / 3)
+    ax.imshow(dataset.max_projection, cmap='gray', vmin=0, vmax=np.amax(dataset.max_projection))
     if show_mask:
         ax.imshow(mask, cmap='jet', alpha=0.3, vmin=0, vmax=1)
     ax.set_xlim(xmin - spacex, xmax + spacex)
@@ -2734,7 +2747,21 @@ def add_stim_codes_to_pkl_df(pkl_df, stim_codes):
         for trial in range(len(pkl_df))]
     return pkl_df
 
-def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
+def format_table_data(dataset):
+    table_data = dataset.lims_data
+    table_data = table_data[['external_specimen_id','structure','depth','operator',
+                             'experiment_date','specimen_driver_line','specimen_reporter_line']]
+    table_data['external_specimen_id'] = 'M'+str(table_data['external_specimen_id'].values[0])
+    table_data['experiment_date'] = str(table_data['experiment_date'].values[0])[:10]
+    table_data['specimen_driver_line'] = table_data['specimen_driver_line'].values[0].split(';')[0]
+    table_data = table_data.transpose()
+    return table_data
+
+def plot_cell_summary_figure(dataset, ra, cell, save=False, show=False):
+    rdf = ra.response_df
+    mdf = ra.mean_response_df
+    sdf = ra.cell_summary_df
+
     figsize = [2 * 11, 2 * 8.5]
     fig = plt.figure(figsize=figsize, facecolor='white')
 
@@ -2742,26 +2769,25 @@ def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
     ax = plot_behavior_events_trace(dataset, [cell], xmin=360, length=3, ax=ax, save=False, ylabel='dF/F')
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .20), yspan=(0, .22))
-    ax = plot_cell_zoom(dataset, cell, spacex=25, spacey=25, show_mask=False, save=False, ax=ax)
-    #    ax = dataset.plot_mask_on_max_proj([cell],ax=ax)
+    ax = plot_cell_zoom(dataset, cell, spacex=25, spacey=25, show_mask=True, save=False, ax=ax)
 
-    ax = placeAxesOnGrid(fig, dim=(1, len(mdf.stim_code.unique())), xspan=(.0, .7), yspan=(.2, .4), wspace=0.35)
-    vmax = np.percentile(dataset.traces[cell, :], 99.9)
-    ax = plot_transition_type_heatmap(dataset, rdf, [cell], vmax=vmax, ax=ax, cmap='jet', colorbar=False)
+    ax = placeAxesOnGrid(fig, dim=(1, len(mdf.change_code.unique())), xspan=(.0, .7), yspan=(.2, .4), wspace=0.35)
+    vmax = np.percentile(dataset.dff_traces[cell, :], 99.9)
+    ax = plot_transition_type_heatmap(ra, [cell], vmax=vmax, ax=ax, cmap='magma', colorbar=False)
+
 
     ax = placeAxesOnGrid(fig, dim=(1, 4), xspan=(.0, .7), yspan=(.4, .6), wspace=0.35, sharex=True, sharey=True)
-    ax = plot_trial_types_selectivity_ns(dataset, mdf, [cell], window=2, save=False, ax=ax)
+    ax = plot_trial_types_selectivity_ns(ra, [cell], window=2, save=False, ax=ax)
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.7, 0.88), yspan=(.0, .2))
-    ax = plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, [cell], ['HIT', 'MISS'], window=[-2, 3], save=False,
+    ax = plot_trial_types_selectivity_pref_image(ra, [cell], ['HIT', 'MISS'], window=[-2, 3], save=False,
                                                  ax=ax)
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.7, 0.88), yspan=(.2, .4))
-    ax = plot_trial_types_selectivity_pref_image(dataset, mdf, sdf, [cell], ['FA', 'CR'], window=[-2, 3], save=False,
+    ax = plot_trial_types_selectivity_pref_image(ra, [cell], ['FA', 'CR'], window=[-2, 3], save=False,
                                                  ax=ax)
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.7, 0.88), yspan=(.4, .6))
-    #    ax = plot_trace_hist(trace,xlabel='dF/F',ax=ax)
-    ax = plot_running_not_running(dataset, cell, sdf, code='change_code', save=False, ax=ax)
+    ax = plot_running_not_running(ra, cell, code='change_code', save=False, ax=ax)
 
     colors = get_colors_for_stim_codes(dataset.stim_codes.stim_code.unique())
     colors.append([1, 1, 1])
@@ -2779,10 +2805,11 @@ def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
     ax = plot_images(dataset, mdf, ax=ax, save=False, orientation='column');
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.7, 0.88), yspan=(.6, 0.8))
-    ax = plot_engaged_disengaged(dataset, cell, sdf, code='change_code', save=False, ax=ax)
+    ax = plot_engaged_disengaged(ra, cell, code='change_code', save=False, ax=ax)
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(0, .7), yspan=(.6, .8))
-    ax = plot_trace_and_stuff(dataset, sdf, cell, second_axis='reward_rate', plot_stim=True, ax=ax)
+    ax = plot_trace_and_behavior(dataset, cell, second_axis='reward_rate', ax=ax)
+    ax = add_stim_color_span(dataset, ax, stim_code=sdf[sdf.cell==cell].pref_stim_code.values[0])
 
     #    ax = pu.placeAxesOnGrid(fig,dim=(1,1),xspan=(0,.7),yspan=(.8,1.))
     ##    trace = dataset.dff_traces[cell,:]
@@ -2790,15 +2817,16 @@ def plot_summary_figure_image(dataset, mdf, sdf, rdf, cell, save=False):
     #    ax = plot_trace_and_stuff(dataset,sdf,cell,second_axis='task_performance',plot_stim=False,ax=ax)
     ##
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(0, 0.2), yspan=(.77, 1))
-    ax = plot_mean_resp_heatmap_cell(dataset.df, cell, values='mean_response', index='initial_code',
+    ax = plot_mean_resp_heatmap_cell(ra.response_df, cell, values='response_window_mean', index='initial_code',
                                      columns='change_code', analysis_dir=None, ax=ax)
 
     fig.tight_layout()
 
     if save:
-        fig_title = dataset.expt_id + '-roi_' + str(cell)
-        save_figure(fig, figsize, dataset.analysis_dir, fig_title, 'cell_summary_plots')
-        plt.close()
+        fig_title = 'roi_' + str(cell)
+        save_figure(fig, figsize, dataset.analysis_dir, 'cell_summary_plots', fig_title)
+        if not show:
+            plt.close()
 
 
 def plot_experiment_summary_figure(dataset, mdf, sdf, save=False):
@@ -2807,16 +2835,22 @@ def plot_experiment_summary_figure(dataset, mdf, sdf, save=False):
     sns.axes_style({'axes.facecolor': 'white'})
 
     ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .24), yspan=(0, .25))
-    ax.imshow(dataset.max_projection, cmap='gray', vmin=0, vmax=np.amax(dataset.max_projection) / 2)
+    ax.imshow(dataset.max_projection, cmap='gray', vmin=0, vmax=np.amax(dataset.max_projection))
     mask = rm.make_filtered_mask(dataset.roi_dict, dataset.roi_dict.keys())
     ax.imshow(mask, cmap='jet', alpha=0.3, vmin=0, vmax=0.7)
     ax.axis('off');
     ax.set_title(dataset.experiment_id)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .24), yspan=(.2, .8))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.78, .99), yspan=(0, .32))
+    table_data = format_table_data(dataset)
+    xtable = ax.table(cellText=table_data.values,  cellLoc='left', rowLoc='left',loc='center', fontsize=12)
+    xtable.scale(1, 3)
+    ax.axis('off');
+
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.0, .24), yspan=(.2, .82))
     plot_behavior(dataset.pkl_df, ax=ax)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.2, 0.92), yspan=(0, .3))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.2, 0.9), yspan=(0, .3))
     ax = plot_traces_heatmap(dataset, cbar=True, ax=ax)
     ax.set_xlim(0, dataset.dff_traces.shape[1])
 
@@ -2848,22 +2882,25 @@ def plot_experiment_summary_figure(dataset, mdf, sdf, save=False):
     tmp = add_stim_codes_to_pkl_df(tmp, dataset.stim_codes)
     #     tmp = add_stim_codes_to_pkl_df(tmp,dataset.stim_codes)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.5, .75), yspan=(.59, .8))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.5, .75), yspan=(.6, .82))
     create_resp_prob_heatmap_general(tmp, index='initial_code', columns='change_code', ax=ax, cmap='magma',
-                                             filter_by_reward_rate=False)
+                                        filter_by_reward_rate=False)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.25, .5), yspan=(.59, .8))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.25, .5), yspan=(.6, .82))
     create_resp_prob_heatmap_general(tmp, values='trial_num', index='initial_code', columns='change_code',
-                                             aggfunc=np.sum, ax=ax, cmap='magma', filter_by_reward_rate=False)
+                                        aggfunc=np.sum, ax=ax, cmap='magma', filter_by_reward_rate=False)
 
-    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.77, 1.), yspan=(.3, .7))
+    ax = placeAxesOnGrid(fig, dim=(1, 1), xspan=(.77, 1.), yspan=(.34, .82))
     plot_response_matrix(mdf, values='response_window_mean', index=['cell'], columns=['change_code'], sig=True,
-                                 ax=ax)
+                            ax=ax, yticks=False)
+
+    ax = placeAxesOnGrid(fig, dim=(1, len(mdf.change_code.unique())), xspan=(.0, 0.99), yspan=(.81, .99),
+                         wspace=0.35)
+    plot_images(dataset, mdf, ax=ax)
 
     fig.tight_layout()
 
     if save:
-        save_figure(fig, figsize, dataset.analysis_dir, str(dataset.experiment_id) + '_DoC', 'expt_summary',
-                       formats=['.png'])
-        analysis_dir = r'\\aibsdata2\nc-ophys\BehaviorImaging\DoC'
-        save_figure(fig, figsize, analysis_dir, str(dataset.experiment_id) + '_DoC', 'experiment_summaries')
+        save_figure(fig, figsize, dataset.analysis_dir, 'experiment_summary', str(dataset.experiment_id) + '_expt_summary')
+        analysis_dir = r'\\aibsdata2\nc-ophys\BehaviorImaging\DoC\2P6_data_analysis'
+        save_figure(fig, figsize, analysis_dir, 'experiment_summaries',str(dataset.session_id) + '_' + str(dataset.experiment_id))

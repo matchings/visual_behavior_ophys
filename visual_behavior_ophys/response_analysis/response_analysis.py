@@ -25,6 +25,7 @@ class ResponseAnalysis(object):
         self.stim_table = dataset.stim_table
         self.metadata = dataset.metadata
         self.save_dir = dataset.analysis_dir
+        self.analysis_dir = dataset.analysis_dir
         self.dff_traces, self.ophys_timestamps = dataset.get_dff_traces()
         self.running_speed, self.stimulus_timestamps = dataset.get_running_speed()
         self.trial_window = trial_window
@@ -38,7 +39,7 @@ class ResponseAnalysis(object):
         self.get_response_dataframe()
         columns = ['cell', 'change_code', 'behavioral_response_type']
         self.mean_response_df = self.get_mean_response_df(columns)
-        # self.cell_summary_df = self.get_cell_summary_df(p_val_thresh=0.005, sd_over_baseline_thresh=3)
+        self.cell_summary_df = self.get_cell_summary_df(p_val_thresh=0.005, sd_over_baseline_thresh=3)
 
     def get_nearest_frame(self, time_point, timestamps):
         return np.nanargmin(abs(timestamps - time_point))

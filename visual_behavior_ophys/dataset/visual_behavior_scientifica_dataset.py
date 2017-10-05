@@ -11,11 +11,12 @@ import pandas as pd
 import cPickle as pickle
 import matplotlib.image as mpimg
 from visual_behavior_ophys.dro import utilities as du
+from visual_behavior_ophys.utilities.lims_database import LimsDatabase
 from visual_behavior_ophys.roi_mask_analysis import roi_mask_analysis as rm
 
 
 class VisualBehaviorScientificaDataset(object):
-    def __init__(self, ophys_session_dir, mouse_id, filter_edge_cells=True, analysis_dir=None):
+    def __init__(self, lims_id, filter_edge_cells=True, analysis_dir=None):
         """initialize visual behavior ophys experiment dataset
 
 			Parameters
@@ -23,14 +24,15 @@ class VisualBehaviorScientificaDataset(object):
 			expt_session_id : ophys experiment session ID
 			mouse_id : 6-digit mouse ID
 		"""
+        self.lims_id = lims_id
         self.analysis_dir = analysis_dir
-        self.mouse_id = mouse_id
-        self.ophys_session_dir = ophys_session_dir
-        self.session_id = ophys_session_dir.split('_')[-1]
-        self.experiment_id = int(
-            [dir for dir in os.listdir(ophys_session_dir) if 'ophys_experiment' in dir][0].split('_')[-1])
         self.filter_edge_cells = filter_edge_cells
+        self.get_lims_data()
         self.get_directories()
+        # self.ophys_session_dir = ophys_session_dir
+        # self.session_id = ophys_session_dir.split('_')[-1]
+        # self.experiment_id = int(
+        #     [dir for dir in os.listdir(ophys_session_dir) if 'ophys_experiment' in dir][0].split('_')[-1])
         self.get_ophys_metadata()
         self.get_sync()
         self.get_pkl()
@@ -44,6 +46,22 @@ class VisualBehaviorScientificaDataset(object):
         self.get_motion_correction()
         self.get_max_projection()
         self.get_dff_traces()
+
+
+
+    def get_lims_data(self):
+        ld = LimsDatabase(self.lims_id)
+        lims_data = ld.get_qc_param()
+        mouse_id = lims_data.external_specimen_id.values[0]
+        self.mouse_id = np.int(mouse_id)
+        self.session_id = lims_data.session_id.values[0]
+        self.ophys_session_dir = lims_data.datafolder.values[0][:-28]
+        self.session_name = lims_data.experiment_name.values[0].split('_')[-1]
+        self.experiment_id = lims_data.lims_id.values[0]
+        lims_data.insert(loc=2, column='experiment_id', value=self.experiment_id)
+        del lims_data['datafolder']
+        self.lims_data = lims_data
+
 
     def get_directories(self):
         self.ophys_experiment_dir = os.path.join(self.ophys_session_dir, 'ophys_experiment_' + str(self.experiment_id))
@@ -59,10 +77,11 @@ class VisualBehaviorScientificaDataset(object):
             if not os.path.exists(analysis_dir):
                 os.mkdir(analysis_dir)
         else:
-            analysis_dir = os.path.join(self.analysis_dir, self.session_id)
-            if not os.path.exists(analysis_dir):
-                os.mkdir(analysis_dir)
-            analysis_dir = os.path.join(analysis_dir, 'analysis')
+            l = self.lims_data
+            folder_name = str(l.lims_id.values[0]) + '_' + l.external_specimen_id.values[0] + '_' + \
+                          l.structure.values[0] + '_' + str(l.depth.values[0]) + '_' + \
+                          l.specimen_driver_line.values[0].split('-')[0] + '_' + self.session_name
+            analysis_dir = os.path.join(self.analysis_dir, folder_name)
             if not os.path.exists(analysis_dir):
                 os.mkdir(analysis_dir)
         self.analysis_dir = analysis_dir
@@ -105,7 +124,7 @@ class VisualBehaviorScientificaDataset(object):
         cam2_exposure = d.get_rising_edges('cam2_exposure') / sample_freq
         stim_photodiode = d.get_rising_edges('stim_photodiode') / sample_freq
         # some experiments have 2P frames prior to stimulus start - restrict to timestamps after trigger
-        frames_2p = frames_2p[frames_2p>trigger[0]]
+        frames_2p = frames_2p[frames_2p > trigger[0]]
         print("Visual frames detected in sync: %s" % len(vsyncs))
         print("2P frames detected in sync: %s" % len(frames_2p))
         # put sync data in dphys format to be compatible with downstream analysis
@@ -133,7 +152,8 @@ class VisualBehaviorScientificaDataset(object):
         if len(pkl_file) > 0:
             self.pkl_path = os.path.join(self.ophys_session_dir, pkl_file[0])
         else:
-            self.expt_date = [file for file in os.listdir(self.ophys_session_dir) if 'sync' in file][0].split('_')[2][2:8]
+            self.expt_date = [file for file in os.listdir(self.ophys_session_dir) if 'sync' in file][0].split('_')[2][
+                             2:8]
             print self.expt_date
             pkl_dir = os.path.join(r'\\allen\programs\braintv\workgroups\neuralcoding\Behavior\Data',
                                    'M' + str(self.mouse_id), 'output')
@@ -254,8 +274,8 @@ class VisualBehaviorScientificaDataset(object):
         objectlist = self.objectlist
         edge_cell_indices = self.get_edge_cell_indices()
         nan_inds = self.get_nan_trace_indices()
-        remove_inds = np.unique(np.hstack((edge_cell_indices, nan_inds))) + 1
-        self.filtered_roi_indices = objectlist[(objectlist['index'].isin(remove_inds) == False)].index.values
+        remove_inds = np.unique(np.hstack((edge_cell_indices, nan_inds)))
+        self.filtered_roi_indices = objectlist[(objectlist.index.isin(remove_inds) == False)].index.values
         return self.filtered_roi_indices
 
     def filter_traces(self, traces):
@@ -265,7 +285,8 @@ class VisualBehaviorScientificaDataset(object):
 
     def filter_roi_metrics(self):
         filtered_roi_indices = self.get_filtered_roi_indices()
-        self.roi_metrics = self.objectlist[(self.objectlist['index'].isin(filtered_roi_indices) == True)]
+        self.roi_metrics = self.objectlist[(self.objectlist.index.isin(filtered_roi_indices) == True)]
+        self.roi_metrics = self.roi_metrics.reset_index()
         return self.roi_metrics
 
     def get_roi_metrics(self):
@@ -279,7 +300,7 @@ class VisualBehaviorScientificaDataset(object):
     def get_roi_mask_array(self):
         f = h5py.File(os.path.join(self.segmentation_dir, "maxInt_masks2.h5"))
         masks = np.asarray(f['data'])
-        roi_dict = rm.make_roi_dict(self.roi_metrics, masks, index=' traceindex')
+        roi_dict = rm.make_roi_dict(self.roi_metrics, masks)
         f.close()
         self.roi_dict = roi_dict
         tmp = roi_dict[roi_dict.keys()[0]]
