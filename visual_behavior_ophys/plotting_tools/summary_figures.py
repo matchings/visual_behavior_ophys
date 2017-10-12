@@ -2903,4 +2903,4 @@ def plot_experiment_summary_figure(dataset, mdf, sdf, save=False):
     if save:
         save_figure(fig, figsize, dataset.analysis_dir, 'experiment_summary', str(dataset.experiment_id) + '_expt_summary')
         analysis_dir = r'\\aibsdata2\nc-ophys\BehaviorImaging\DoC\2P6_data_analysis'
-        save_figure(fig, figsize, analysis_dir, 'experiment_summaries',str(dataset.session_id) + '_' + str(dataset.experiment_id))
+        save_figure(fig, figsize, analysis_dir, 'experiment_summaries',str(dataset.mouse_id)+'_'+str(dataset.session_id) + '_' + str(dataset.experiment_id))

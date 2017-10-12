@@ -2,12 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6340d208-fb54-4beb-a8d5-57f445d4b0db" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/visual_behavior_ophys/examples/.ipynb_checkpoints/visual_behavior_scientitifica_dataset_plotting-Copy1-checkpoint.ipynb" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting-Copy1.ipynb" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py" afterPath="$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting.ipynb" afterPath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting.ipynb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting_batch-Copy1.ipynb" afterPath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting_batch-Copy1.ipynb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting_batch-Copy2.ipynb" afterPath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting_batch-Copy2.ipynb" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting_batch.ipynb" afterPath="$PROJECT_DIR$/visual_behavior_ophys/examples/visual_behavior_scientitifica_dataset_plotting_batch.ipynb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py" afterPath="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" afterPath="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py" afterPath="$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,8 +26,8 @@
       <file leaf-file-name="visual_behavior_scientifica_dataset.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="731">
-              <caret line="82" column="98" lean-forward="false" selection-start-line="82" selection-start-column="98" selection-end-line="82" selection-end-column="98" />
+            <state relative-caret-position="204">
+              <caret line="57" column="69" lean-forward="false" selection-start-line="57" selection-start-column="69" selection-end-line="57" selection-end-column="69" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
@@ -36,9 +38,21 @@
       <file leaf-file-name="roi_mask_analysis.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="663">
-              <caret line="49" column="22" lean-forward="false" selection-start-line="49" selection-start-column="22" selection-end-line="49" selection-end-column="22" />
+            <state relative-caret-position="546">
+              <caret line="305" column="26" lean-forward="false" selection-start-line="305" selection-start-column="0" selection-end-line="306" selection-end-column="0" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cross_session_registration_ssim.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/utilities/cross_session_registration_ssim.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="459">
+              <caret line="27" column="1" lean-forward="false" selection-start-line="27" selection-start-column="1" selection-end-line="27" selection-end-column="1" />
+              <folding>
+                <element signature="e#30#39#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -46,7 +60,7 @@
       <file leaf-file-name="response_analysis.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5661">
+            <state relative-caret-position="5627">
               <caret line="333" column="44" lean-forward="false" selection-start-line="333" selection-start-column="44" selection-end-line="333" selection-end-column="44" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -55,11 +69,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="summary_figures.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="summary_figures.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="664">
-              <caret line="2901" column="0" lean-forward="true" selection-start-line="2901" selection-start-column="0" selection-end-line="2901" selection-end-column="0" />
+            <state relative-caret-position="308">
+              <caret line="2838" column="68" lean-forward="false" selection-start-line="2838" selection-start-column="68" selection-end-line="2839" selection-end-column="60" />
               <folding>
                 <element signature="e#150#159#0" expanded="true" />
               </folding>
@@ -70,7 +84,7 @@
       <file leaf-file-name="lims_database.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/utilities/lims_database.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="629">
+            <state relative-caret-position="1292">
               <caret line="79" column="33" lean-forward="false" selection-start-line="79" selection-start-column="33" selection-end-line="79" selection-end-column="33" />
               <folding>
                 <element signature="e#151#160#0" expanded="true" />
@@ -123,8 +137,8 @@
       <find>plot_images</find>
       <find>plot_response_matrix</find>
       <find>traces_heatmap</find>
-      <find>transition_type</find>
       <find>data_pointer</find>
+      <find>transition_type</find>
     </findStrings>
     <replaceStrings>
       <replace>analysis_dir</replace>
@@ -141,16 +155,17 @@
         <option value="$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/utilities/lims_database.py" />
-        <option value="$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py" />
         <option value="$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py" />
+        <option value="$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py" />
+        <option value="$PROJECT_DIR$/visual_behavior_ophys/utilities/cross_session_registration_ssim.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1912" />
+    <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1296" />
-    <option name="height" value="1040" />
+    <option name="width" value="1936" />
+    <option name="height" value="1216" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -184,6 +199,30 @@
       </list>
     </option>
   </component>
+  <component name="RunManager" selected="Python.cross_session_registration_ssim">
+    <configuration name="cross_session_registration_ssim" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/visual_behavior_ophys/utilities" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="visual_behavior_ophys" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/visual_behavior_ophys/utilities/cross_session_registration_ssim.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Python.cross_session_registration_ssim" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
   </component>
@@ -201,19 +240,19 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1912" y="-8" width="1296" height="1040" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23684211" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -234,6 +273,64 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="833">
+          <caret line="49" column="22" lean-forward="false" selection-start-line="49" selection-start-column="22" selection-end-line="49" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5661">
+          <caret line="333" column="44" lean-forward="false" selection-start-line="333" selection-start-column="44" selection-end-line="333" selection-end-column="44" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="49164">
+          <caret line="2901" column="0" lean-forward="false" selection-start-line="2901" selection-start-column="0" selection-end-line="2901" selection-end-column="0" />
+          <folding>
+            <element signature="e#150#159#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/utilities/lims_database.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1292">
+          <caret line="79" column="33" lean-forward="false" selection-start-line="79" selection-start-column="33" selection-end-line="79" selection-end-column="33" />
+          <folding>
+            <element signature="e#151#160#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/basic_plotting.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding>
+            <element signature="e#71#80#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5151">
@@ -427,17 +524,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="663">
-          <caret line="49" column="22" lean-forward="false" selection-start-line="49" selection-start-column="22" selection-end-line="49" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/response_analysis/response_analysis.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5661">
+        <state relative-caret-position="5627">
           <caret line="333" column="44" lean-forward="false" selection-start-line="333" selection-start-column="44" selection-end-line="333" selection-end-column="44" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
@@ -445,19 +534,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="82" column="98" lean-forward="false" selection-start-line="82" selection-start-column="98" selection-end-line="82" selection-end-column="98" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/utilities/lims_database.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="629">
+        <state relative-caret-position="1292">
           <caret line="79" column="33" lean-forward="false" selection-start-line="79" selection-start-column="33" selection-end-line="79" selection-end-column="33" />
           <folding>
             <element signature="e#151#160#0" expanded="true" />
@@ -467,10 +546,38 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/plotting_tools/summary_figures.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="664">
-          <caret line="2901" column="0" lean-forward="true" selection-start-line="2901" selection-start-column="0" selection-end-line="2901" selection-end-column="0" />
+        <state relative-caret-position="308">
+          <caret line="2838" column="68" lean-forward="false" selection-start-line="2838" selection-start-column="68" selection-end-line="2839" selection-end-column="60" />
           <folding>
             <element signature="e#150#159#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/dataset/visual_behavior_scientifica_dataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="57" column="69" lean-forward="false" selection-start-line="57" selection-start-column="69" selection-end-line="57" selection-end-column="69" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/roi_mask_analysis/roi_mask_analysis.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="546">
+          <caret line="305" column="26" lean-forward="false" selection-start-line="305" selection-start-column="0" selection-end-line="306" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visual_behavior_ophys/utilities/cross_session_registration_ssim.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="27" column="1" lean-forward="false" selection-start-line="27" selection-start-column="1" selection-end-line="27" selection-end-column="1" />
+          <folding>
+            <element signature="e#30#39#0" expanded="true" />
           </folding>
         </state>
       </provider>

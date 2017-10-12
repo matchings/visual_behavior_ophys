@@ -78,7 +78,7 @@ class VisualBehaviorScientificaDataset(object):
                 os.mkdir(analysis_dir)
         else:
             l = self.lims_data
-            folder_name = str(l.lims_id.values[0]) + '_' + l.external_specimen_id.values[0] + '_' + \
+            folder_name = str(l.external_specimen_id.values[0]) + '_' + str(l.lims_id.values[0]) + '_' + \
                           l.structure.values[0] + '_' + str(l.depth.values[0]) + '_' + \
                           l.specimen_driver_line.values[0].split('-')[0] + '_' + self.session_name
             analysis_dir = os.path.join(self.analysis_dir, folder_name)
